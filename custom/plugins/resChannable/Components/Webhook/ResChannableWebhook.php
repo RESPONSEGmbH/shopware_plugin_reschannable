@@ -3,6 +3,7 @@
 namespace resChannable\Components\Webhook;
 
 use Doctrine\DBAL\Connection;
+use Shopware\Bundle\StoreFrontBundle\Service\Core\ContextService;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\CachedConfigReader;
 use Shopware\Bundle\StoreFrontBundle\Struct;

@@ -14,6 +14,7 @@
 
 namespace resChannable;
 
+use Doctrine\Common\EventArgs;
 use Doctrine\ORM\Tools\SchemaTool;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\InstallContext;
