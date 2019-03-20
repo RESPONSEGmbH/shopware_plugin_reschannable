@@ -16,14 +16,10 @@ class Article implements SubscriberInterface
 
     public function __construct()
     {
-
     }
 
     public function onPostDispatchBackendArticle(\Enlight_Event_EventArgs $args)
     {
-        /** @var \Shopware_Controllers_Backend_Article $subject */
-        $subject = $args->getSubject();
-
         $request = $args->getRequest();
 
         if ( $request->getActionName() == 'save' ) {
@@ -56,9 +52,6 @@ class Article implements SubscriberInterface
      */
     public function onPreDispatchBackendArticle(\Enlight_Event_EventArgs $args)
     {
-        /** @var \Shopware_Controllers_Backend_Article $subject */
-        $subject = $args->getSubject();
-
         $request = $args->getRequest();
 
         if ( $request->getActionName() == 'save' ) {
@@ -76,20 +69,24 @@ class Article implements SubscriberInterface
                 # new price
                 $newPrice = round($data['mainPrices'][0]['price'],2);
 
+                # new lastStock
+                $newLastStock = $data['lastStock'];
+
                 # old data
                 $detail = $this->getDetailRepository()
                     ->find((int) $data['mainDetailId']);
+                /** @var \Shopware\Models\Article\Article $article */
+                $article = $detail->getArticle();
 
                 $oldStock = $detail->getInStock();
-
-                $article = $detail->getArticle();
+                $oldLastStock = $article->getLastStock();
 
                 $prices = $this->getPrices($data['mainDetailId'],$article->getTax()->getTax());
 
                 $oldPrice = $prices[0]['price'];
 
                 # Start hook if new stock or price
-                if ( $newStock <> $oldStock || $newPrice <> $oldPrice ) {
+                if ( $newStock <> $oldStock || $newPrice <> $oldPrice || $newLastStock != $oldLastStock ) {
 
                     $number = $detail->getNumber();
 
@@ -119,20 +116,24 @@ class Article implements SubscriberInterface
                 # new price
                 $newPrice = round($data['price'],2);
 
+                # new lastStock
+                $newLastStock = $data['lastStock'];
+
                 # old data
                 $detail = $this->getDetailRepository()
                     ->find((int) $data['id']);
+                /** @var \Shopware\Models\Article\Article $article */
+                $article = $detail->getArticle();
 
                 $oldStock = $detail->getInStock();
-
-                $article = $detail->getArticle();
+                $oldLastStock = $article->getLastStock();
 
                 $prices = $this->getPrices($data['id'],$article->getTax()->getTax());
 
                 $oldPrice = $prices[0]['price'];
 
                 # Start hook if new stock or price
-                if ( $newStock <> $oldStock || $newPrice <> $oldPrice ) {
+                if ( $newStock <> $oldStock || $newPrice <> $oldPrice || $newLastStock != $oldLastStock ) {
 
                     $number = $detail->getNumber();
 

@@ -39,9 +39,9 @@ class resChannable extends Plugin
     /**
      * onProductStockWasChanged
      *
-     * @param EventArgs $eventArgs
+     * @param \Enlight_Event_EventArgs $args
      */
-    public function onProductStockWasChanged(EventArgs $eventArgs)
+    public function onProductStockWasChanged(\Enlight_Event_EventArgs $args)
     {
         $config = $this->container->get('shopware.plugin.cached_config_reader')->getByPluginName($this->getName());
 
@@ -49,7 +49,7 @@ class resChannable extends Plugin
             return;
 
         $webhook = $this->container->get('reschannable_service_plugin.webhook');
-        $webhook->updateChannableForAllShops($eventArgs->get('number'));
+        $webhook->updateChannableForAllShops($args->get('number'));
     }
 
     /**

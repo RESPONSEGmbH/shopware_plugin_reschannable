@@ -26,9 +26,6 @@ class ArticleList implements SubscriberInterface
      */
     public function onPostDispatchBackendArticleList(\Enlight_Event_EventArgs $args)
     {
-        /** @var \Shopware_Controllers_Backend_ArticleList $subject */
-        $subject = $args->getSubject();
-
         $request = $args->getRequest();
 
         if ( $request->getActionName() == 'saveSingleEntity' ) {
@@ -49,9 +46,6 @@ class ArticleList implements SubscriberInterface
      */
     public function onPreDispatchBackendArticleList(\Enlight_Event_EventArgs $args)
     {
-        /** @var \Shopware_Controllers_Backend_ArticleList $subject */
-        $subject = $args->getSubject();
-
         $request = $args->getRequest();
 
         if ( $request->getActionName() == 'saveSingleEntity' ) {

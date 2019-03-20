@@ -21,11 +21,6 @@ class ResChannableWebhook
     private $entityManager;
 
     /**
-     * @var ContextService
-     */
-    private $contextService;
-
-    /**
      * @var CachedConfigReader
      */
     private $configReader;
@@ -49,7 +44,6 @@ class ResChannableWebhook
     /**
      * @param Connection                          $connection
      * @param ModelManager                        $entityManager
-     * @param Struct\ShopContextInterface         $contextService
      * @param CachedConfigReader                  $configReader
      * @param Service\ListProductServiceInterface $listProductService
      * @param Service\AdditionalTextServiceInterface $additionalTextService
@@ -57,7 +51,6 @@ class ResChannableWebhook
     public function __construct(
         Connection $connection,
         ModelManager $entityManager,
-        Struct\ShopContextInterface $contextService,
         CachedConfigReader $configReader,
         Service\ListProductServiceInterface $listProductService,
         Service\AdditionalTextServiceInterface $additionalTextService
@@ -65,7 +58,6 @@ class ResChannableWebhook
     {
         $this->connection = $connection;
         $this->entityManager = $entityManager;
-        $this->contextService = $contextService;
         $this->configReader = $configReader;
         $this->listProductService = $listProductService;
         $this->additionalTextService = $additionalTextService;
@@ -153,10 +145,10 @@ class ResChannableWebhook
         $config = $this->_getPluginConfig();
 
         $detail = $this->getDetailRepository()->findOneBy(array('number' => $number));
+        /** @var \Shopware\Models\Article\Article $article */
         $article = $detail->getArticle();
         $detailId = $detail->getId();
-
-        $prices = $this->getPrices($detailId,$article->getTax()->getTax());
+        $articleId = $article->getId();
 
         if ( !$config['apiAllowRealTimeUpdates'] )
             return;
@@ -192,10 +184,23 @@ class ResChannableWebhook
 
         }
 
+        $translations = $this->getTranslations($articleId,$shop->getId());
+        $prices = $this->getPrices($detailId,$article->getTax()->getTax());
+        $inStock = $detail->getInStock();
+
         $item = array();
         $item['id'] = $detailId;
-        $item['stock'] = $detail->getInStock();
+        $item['articleId'] = $articleId;
+        $item['number'] = $number;
+        $item['name'] = $article->getName();
+        $item['stock'] = $inStock;
+        $item['stockTracking'] = ( $article->getLastStock() === true );
         $item['price'] = $prices[0]['price'];
+        $item['ean'] = $detail->getEan();
+
+        if ( !empty($translations['name']) ) {
+            $item['name'] = $translations['name'];
+        }
 
         return $item;
     }
@@ -287,6 +292,35 @@ class ResChannableWebhook
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 
         $result = curl_exec($ch);
+    }
+
+    /**
+     * Get article translations
+     *
+     * @param $articleId
+     * @param $shopId
+     * @return array
+     */
+    private function getTranslations($articleId,$shopId)
+    {
+        $builder = $this->connection->createQueryBuilder();
+        $builder->select(array(
+            'translations.languageID','locales.language','locales.locale','translations.name',
+            'translations.description','translations.description_long as descriptionLong',
+            'translations.keywords'
+        ));
+        $builder->from('s_articles_translations', 'translations');
+        $builder->innerJoin('translations','s_core_shops','shops','translations.languageID = shops.id');
+        $builder->innerJoin('shops','s_core_locales','locales','shops.locale_id = locales.id');
+        $builder->where('translations.articleID = :articleId');
+        $builder->andWhere('translations.languageID = :languageID');
+        $builder->setParameter('articleId',$articleId);
+        $builder->setParameter('languageID',$shopId);
+
+        $statement = $builder->execute();
+        $languages = $statement->fetch(\PDO::FETCH_ASSOC);
+
+        return $languages;
     }
 
 }
