@@ -17,6 +17,7 @@ namespace resChannable;
 use Doctrine\ORM\Tools\SchemaTool;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\InstallContext;
+use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Models\User\User;
 
 class resChannable extends Plugin
@@ -104,6 +105,34 @@ class resChannable extends Plugin
         $this->createApiUser();
 
         $this->createSchema();
+    }
+
+    /**
+     * Install handler
+     *
+     * @param UpdateContext $context
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function update(UpdateContext $context)
+    {
+        $fromVersion = $context->getCurrentVersion();
+        $toVersion = $context->getUpdateVersion();
+        /** @var \Shopware\Models\Plugin\Plugin $plugin */
+        $plugin = $context->getPlugin();
+        $pluginId = $plugin->getId();
+
+        # Update from version < 1.5.0 to 1.5.0
+        if ( version_compare($fromVersion, '1.5.0','<') && version_compare($toVersion, '1.5.0','>=') ) {
+
+            # Delete menu entry
+            $sql = "DELETE FROM s_core_menu
+                    WHERE pluginID = :pluginId";
+            Shopware()->Db()->query($sql, [':pluginId' => $pluginId]);
+
+            # Delete old Channable article table
+            $sql = "DROP TABLE reschannable_articles";
+            Shopware()->Db()->query($sql);
+        }
     }
 
     /**

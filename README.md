@@ -26,10 +26,6 @@ https://github.com/RESPONSEGmbH/shopware_plugin_reschannable/archive/master.zip
 1.	Open the Plugin Manager and click on the pin icon of the Channable Connector
 2.	In the Configuration tab, you can now make the following settings:
 
-##### Transfer all articles
-This setting overrides manual article mapping.<br />
-Default: yes
-
 ##### Only transfer active articles:
 Decide here if also inactive articles should be transferred.<br />
 Default: no

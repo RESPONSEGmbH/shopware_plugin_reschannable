@@ -16,39 +16,6 @@ class ResChannableArticle extends Resource
      *
      * @return array
      */
-    public function getAllArticlesList($offset, $limit, $filter, $sort)
-    {
-        $this->checkPrivilege('read');
-
-        $builder = $this->getAllArticlesBaseQuery();
-        $builder = $this->addQueryLimit($builder, $offset, $limit);
-
-        if (!empty($filter)) {
-            $builder->addFilter($filter);
-        }
-        if (!empty($sort)) {
-            $builder->addOrderBy($sort);
-        }
-
-        $query = $builder->getQuery();
-
-        $query->setHydrationMode($this->getResultMode());
-
-        $paginator = $this->getManager()->createPaginator($query);
-        $totalResult = $paginator->count();
-        $articles = $paginator->getIterator()->getArrayCopy();
-
-        return array('data' => $articles, 'total' => $totalResult);
-    }
-
-    /**
-     * @param $offset
-     * @param $limit
-     * @param $filter
-     * @param $sort
-     *
-     * @return array
-     */
     public function getList($offset, $limit, $filter, $sort)
     {
         $this->checkPrivilege('read');
@@ -76,8 +43,8 @@ class ResChannableArticle extends Resource
 
     /**
      * @param QueryBuilder $builder
-     * @param              $offset
-     * @param null         $limit
+     * @param int          $offset
+     * @param int          $limit
      *
      * @return QueryBuilder
      */
@@ -92,7 +59,7 @@ class ResChannableArticle extends Resource
     /**
      * @return \Doctrine\ORM\QueryBuilder|QueryBuilder
      */
-    protected function getAllArticlesBaseQuery()
+    protected function getBaseQuery()
     {
         $builder = $this->getManager()->createQueryBuilder();
 
@@ -105,35 +72,6 @@ class ResChannableArticle extends Resource
             'supplier'
         ))
             ->from('Shopware\Models\Article\Detail', 'detail')
-            ->join('detail.article', 'article')
-            ->leftJoin('article.allCategories', 'categories', null, null, 'categories.id')
-            ->leftJoin('detail.unit', 'detailUnit')
-            ->leftJoin('article.tax', 'tax')
-            ->leftJoin('detail.attribute', 'detailAttribute')
-            ->leftJoin('article.supplier', 'supplier')
-            ->addGroupBy('detail.id');
-
-        return $builder;
-    }
-
-    /**
-     * @return \Doctrine\ORM\QueryBuilder|QueryBuilder
-     */
-    protected function getBaseQuery()
-    {
-        $builder = $this->getManager()->createQueryBuilder();
-
-        $builder->select(array(
-            'ChannableArticle',
-            'article',
-            'detail',
-            'detailUnit',
-            'tax',
-            'detailAttribute',
-            'supplier'
-        ))
-            ->from('resChannable\Models\resChannableArticle\resChannableArticle', 'ChannableArticle')
-            ->join('ChannableArticle.detail', 'detail')
             ->join('detail.article', 'article')
             ->leftJoin('article.allCategories', 'categories', null, null, 'categories.id')
             ->leftJoin('detail.unit', 'detailUnit')

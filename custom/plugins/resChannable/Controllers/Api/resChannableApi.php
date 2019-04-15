@@ -221,7 +221,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $images = $imageArticle['images'];
 
             # If main article without variants set article images
-            if ( !$images && !$article['configuratorSetId'] ) {
+            if ( !$images ) {
                 $images = $imageArticle['article']['images'];
             }
 
@@ -376,15 +376,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $filter = array();
 
-        # only articles with images
-        /*if ( $this->pluginConfig['apiOnlyArticlesWithImg'] ) {
-            $filter[] = array(
-                'property'   => 'images.id',
-                'expression' => '>',
-                'value'      => '0'
-            );
-        }*/
-
         # filter category id
         $categoriesId = $this->shop->getCategory()->getId();
 
@@ -417,12 +408,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             );
         }
 
-        # check if all articles flag is set
-        if ( $this->pluginConfig['apiAllArticles'] ) {
-            $result = $this->channableArticleResource->getAllArticlesList($offset, $limit, $filter, $sort);
-        } else {
-            $result = $this->channableArticleResource->getList($offset, $limit, $filter, $sort);
-        }
+        # Get article list
+        $result = $this->channableArticleResource->getList($offset, $limit, $filter, $sort);
 
         return $result['data'];
     }

@@ -153,37 +153,6 @@ class ResChannableWebhook
         if ( !$config['apiAllowRealTimeUpdates'] )
             return;
 
-        if ( !$config['apiAllArticles'] ) {
-
-            $builder = $this->entityManager->createQueryBuilder();
-
-            $builder->select(array(
-                'ChannableArticle',
-                'article',
-                'detail'
-            ))
-                ->from('resChannable\Models\resChannableArticle\resChannableArticle', 'ChannableArticle')
-                ->join('ChannableArticle.detail', 'detail')
-                ->join('detail.article', 'article');
-
-            $builder->where('detail.id = :id')
-                ->setParameter('id', $detailId);
-
-            # only articles with an ean
-            if ( $config['apiOnlyArticlesWithEan'] ) {
-
-                $builder->andWhere("detail.ean != ''");
-
-            }
-
-            $article = $builder->getQuery()
-                ->getOneOrNullResult(\Doctrine\ORM\AbstractQuery::HYDRATE_ARRAY);
-
-            if ( !$article )
-                return;
-
-        }
-
         $translations = $this->getTranslations($articleId,$shop->getId());
         $prices = $this->getPrices($detailId,$article->getTax()->getTax());
         $inStock = $detail->getInStock();

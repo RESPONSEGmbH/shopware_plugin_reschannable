@@ -77,8 +77,6 @@ Ext.define('Shopware.apps.ReschannableArticles.view.articles.tabs.ArticleMapping
     init: function() {
         var me = this;
 
-        console.log('article_mapping init');
-
         me.control({
             'reschannablearticles-articles-tabs-article_mapping':{
                 recordloaded : me.onRecordLoaded
