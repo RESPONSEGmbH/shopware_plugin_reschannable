@@ -3,14 +3,18 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
     <services>
         <service id="reschannable.subscriber.backend_articlelist" class="resChannable\Subscriber\Backend\ArticleList">
             <tag name="shopware.event_subscriber" />
         </service>
+
         <service id="reschannable.subscriber.backend_article" class="resChannable\Subscriber\Backend\Article">
             <tag name="shopware.event_subscriber" />
         </service>
-        <service id="shopware.api.reschannablearticle" class="resChannable\Components\Api\Resource\ResChannableArticle"/>
+
+        <service id="shopware.api.reschannablearticle" class="resChannable\Components\Api\Resource\ResChannableArticle" />
+
         <service id="reschannable_service_plugin.webhook" class="resChannable\Components\Webhook\ResChannableWebhook">
             <argument type="service" id="dbal_connection" />
             <argument type="service" id="models" />
@@ -18,5 +22,6 @@
             <argument type="service" id="shopware_storefront.list_product_service"/>
             <argument type="service" id="shopware_storefront.additional_text_service"/>
         </service>
+
     </services>
 </container>

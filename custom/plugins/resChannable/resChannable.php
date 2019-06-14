@@ -108,7 +108,7 @@ class resChannable extends Plugin
     }
 
     /**
-     * Install handler
+     * Update handler
      *
      * @param UpdateContext $context
      * @throws \Doctrine\ORM\OptimisticLockException

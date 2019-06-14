@@ -31,15 +31,13 @@ class Shopware_Controllers_Backend_ReschannableArticles extends Shopware_Control
             ->leftJoin('details', 'reschannable_articles', 'reschannable_articles', 'details.id = reschannable_articles.detailID')
             ->andWhere('reschannable_articles.detailID IS NULL');
 
-        $params = array();
         if (!empty($search)) {
             $builder->andWhere('(articles.name LIKE :search OR details.ordernumber LIKE :search OR suppliers.name LIKE :search)');
-            $params['search'] = '%' . $search . '%';
+            $builder->setParameter('search', '%' . $search . '%');
         }
 
         $builder->setFirstResult($offset);
         $builder->setMaxResults($limit);
-        $builder->setParameters($params);
         $result = $builder->execute()->fetchAll();
 
         $count = $this->get('dbal_connection')->fetchColumn('SELECT FOUND_ROWS()');

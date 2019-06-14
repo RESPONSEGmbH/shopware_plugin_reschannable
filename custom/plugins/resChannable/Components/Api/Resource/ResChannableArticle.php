@@ -296,7 +296,7 @@ class ResChannableArticle extends Resource
             ->leftJoin('article.images', 'articleImages')
             ->leftJoin('articleImages.parent', 'articleImageParent')
             ->where('detail.id = :detailId')
-            ->setParameters(array('detailId' => $detailId));
+            ->setParameter('detailId', $detailId);
 
         $images = $this->getSingleResult($builder);
 
@@ -325,7 +325,7 @@ class ResChannableArticle extends Resource
             ->join('propertyValues.option', 'propertyOption')
             ->join('article.propertyGroup', 'propertyGroup')
             ->where('detail.id = :detailId')
-            ->setParameters(array('detailId' => $detailId));
+            ->setParameter('detailId', $detailId);
 
         $properties = $this->getSingleResult($builder);
 
@@ -350,7 +350,7 @@ class ResChannableArticle extends Resource
             ->join('detail.configuratorOptions', 'configuratorOptions')
             ->join('configuratorOptions.group', 'configuratorGroups')
             ->where('detail.id = :detailId')
-            ->setParameters(array('detailId' => $detailId));
+            ->setParameter('detailId', $detailId);
 
         $options = $this->getSingleResult($builder);
 
@@ -375,7 +375,7 @@ class ResChannableArticle extends Resource
             ->join('detail.article', 'article')
             ->join('article.customerGroups', 'excludedCustomerGroups')
             ->where('detail.id = :detailId')
-            ->setParameters(array('detailId' => $detailId));
+            ->setParameter('detailId', $detailId);
 
         $groups = $this->getSingleResult($builder);
 

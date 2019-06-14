@@ -97,6 +97,11 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     private $pluginConfig = null;
 
     /**
+     * @var \Shopware\Bundle\AttributeBundle\Service\ConfigurationStruct[]
+     */
+    private $articleAttributeConfig = null;
+
+    /**
      * Init function
      *
      * @throws \Exception
@@ -134,6 +139,13 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $this->setContainer(Shopware()->Container());
 
         $this->pluginConfig = $this->container->get('shopware.plugin.cached_config_reader')->getByPluginName('resChannable', $this->shop);
+
+        $articleAttributes = $this->container->get('shopware_attribute.crud_service')->getList('s_articles_attributes');
+
+        foreach ($articleAttributes as $attribute) {
+            if ( !$attribute->isIdentifier() && $attribute->isConfigured() )
+                $this->articleAttributeConfig[$attribute->getColumnName()] = $attribute->getLabel();
+        }
 
         $this->channableArticleResource = Manager::getResource('ResChannableArticle');
         $this->mediaResource = Manager::getResource('Media');
@@ -203,14 +215,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $articleCnt = count($articleIdList);
         for ($i = 0; $i < $articleCnt; $i++) {
 
-            $channableArticle = $articleIdList[$i];
-
-            # fix because of the "transfer all articles" flag
-            if ($channableArticle['detail']) {
-                $detail = $channableArticle['detail'];
-            } else {
-                $detail = $channableArticle;
-            }
+            $detail = $articleIdList[$i];
 
             $article = $detail['article'];
             $articleId = $detail['articleId'];
@@ -353,6 +358,13 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             # Excluded customer groups
             $item['excludedCustomerGroups'] = $this->getExcludedCustomerGroups($detail['id']);
+
+            # Article attributes
+            foreach ( $detail['attribute'] as $attrName => $attrVal ) {
+
+                if ( isset($this->articleAttributeConfig[$attrName]) )
+                    $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $attrVal;
+            }
 
             $result[] = $item;
         }
