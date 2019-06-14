@@ -11,6 +11,23 @@
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
 
+    <changelog version="1.6.1">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Internationalisierung: Übersetzungen der Artikel-Freitextfelder</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes lang="en">
+            <![CDATA[
+                <ul>
+                    <li>Internationalization: Translations of article free text fields</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
+
     <changelog version="1.6.0">
         <changes lang="de">
             <![CDATA[

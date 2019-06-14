@@ -238,6 +238,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             # Replace translations if exist
             $translationVariant = $this->translationComponent->read($this->shopId,'variant',$articleId);
             $translations = $this->getTranslations($articleId,$this->shopId);
+
             if ( !empty($translations['name']) ) {
                 $article['name'] = $translations['name'];
             }
@@ -362,8 +363,15 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             # Article attributes
             foreach ( $detail['attribute'] as $attrName => $attrVal ) {
 
-                if ( isset($this->articleAttributeConfig[$attrName]) )
-                    $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $attrVal;
+                if ( isset($this->articleAttributeConfig[$attrName]) ) {
+
+                    # Set translations if available
+                    if ( !empty($translations[$attrName]) ) {
+                        $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $translations[$attrName];
+                    } else {
+                        $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $attrVal;
+                    }
+                }
             }
 
             $result[] = $item;
@@ -714,9 +722,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     {
         $builder = Shopware()->Container()->get('dbal_connection')->createQueryBuilder();
         $builder->select(array(
-            'translations.languageID','locales.language','locales.locale','translations.name',
-            'translations.description','translations.description_long as descriptionLong',
-            'translations.keywords'
+            'translations.*'
         ));
         $builder->from('s_articles_translations', 'translations');
         $builder->innerJoin('translations','s_core_shops','shops','translations.languageID = shops.id');
