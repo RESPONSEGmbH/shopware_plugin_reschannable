@@ -85,7 +85,7 @@ class ResChannableWebhook
             return;
 
         # Post stock data
-        $this->_postData(array($article),$config['apiWebhookUrl']);
+        $this->_postData(array($article),$config['apiWebhookUrl'], $shop);
     }
 
     /**
@@ -112,13 +112,14 @@ class ResChannableWebhook
                 continue;
 
             # Post stock data
-            $this->_postData(array($article), $config['apiWebhookUrl']);
+            $this->_postData(array($article), $config['apiWebhookUrl'], $shop);
         }
     }
 
     /**
      * Get plugin config
      *
+     * @param \Shopware\Models\Shop\Shop $shop
      * @return array|mixed
      */
     private function _getPluginConfig($shop)
@@ -142,7 +143,7 @@ class ResChannableWebhook
      */
     private function _getArticleData($number, $shop)
     {
-        $config = $this->_getPluginConfig();
+        $config = $this->_getPluginConfig($shop);
 
         $detail = $this->getDetailRepository()->findOneBy(array('number' => $number));
         /** @var \Shopware\Models\Article\Article $article */
@@ -236,11 +237,13 @@ class ResChannableWebhook
     /**
      * Post data to Channable webhook url
      *
-     * @param $data
+     * @param array $data
+     * @param string $url
+     * @param \Shopware\Models\Shop\Shop $shop
      */
-    private function _postData($data, $url)
+    private function _postData($data, $url, $shop)
     {
-        $config = $this->_getPluginConfig();
+        $config = $this->_getPluginConfig($shop);
 
         # Check webhook url
         if ( !$config['apiWebhookUrl'] )

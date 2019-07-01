@@ -4,12 +4,29 @@
     <label lang="de">Channable Connector</label>
     <label lang="en">Channable Connector</label>
 
-    <version>1.6.1</version>
+    <version>1.6.2</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>MIT</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+
+    <changelog version="1.6.2">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Bugfix: Webhook Datenübertragung korrigert</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes lang="en">
+            <![CDATA[
+                <ul>
+                    <li>Bugfix: Webhook data transfer corrected</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
 
     <changelog version="1.6.1">
         <changes lang="de">
