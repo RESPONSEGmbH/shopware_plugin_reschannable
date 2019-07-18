@@ -13,7 +13,9 @@
             <tag name="shopware.event_subscriber" />
         </service>
 
-        <service id="shopware.api.reschannablearticle" class="resChannable\Components\Api\Resource\ResChannableArticle" />
+        <service id="shopware.api.reschannablearticle" class="resChannable\Components\Api\Resource\ResChannableArticle">
+            <tag name="shopware.api_resource"/>
+        </service>
 
         <service id="reschannable_service_plugin.webhook" class="resChannable\Components\Webhook\ResChannableWebhook">
             <argument type="service" id="dbal_connection" />

@@ -150,13 +150,17 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $this->channableArticleResource = Manager::getResource('ResChannableArticle');
         $this->mediaResource = Manager::getResource('Media');
         $this->translationResource = Manager::getResource('Translation');
+        $this->config = Shopware()->Config();
 
-        $this->translationComponent = new Shopware_Components_Translation();
+        if (version_compare($this->config->get('version'), '5.6.0', '>=')) {
+            $this->translationComponent = new Shopware_Components_Translation($this->container->get('dbal_connection'),$this->container);
+        } else {
+            $this->translationComponent = new Shopware_Components_Translation();
+        }
+
         $this->configUnits = array_shift(array_values($this->translationComponent->read($this->shopId,'config_units')));
 
         $this->sSYSTEM = Shopware()->System();
-
-        $this->config = Shopware()->Config();
 
         $this->moduleManager = $this->container->get('Modules');
 
@@ -361,17 +365,26 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['excludedCustomerGroups'] = $this->getExcludedCustomerGroups($detail['id']);
 
             # Article attributes
-            foreach ( $detail['attribute'] as $attrName => $attrVal ) {
+            if ( $detail['attribute'] ) {
+                foreach ($detail['attribute'] as $attrName => $attrVal) {
 
-                if ( isset($this->articleAttributeConfig[$attrName]) ) {
+                    if (isset($this->articleAttributeConfig[$attrName])) {
 
-                    # Set translations if available
-                    if ( !empty($translations[$attrName]) ) {
-                        $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $translations[$attrName];
-                    } else {
-                        $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $attrVal;
+                        # Set translations if available
+                        if (!empty($translations[$attrName])) {
+                            $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $translations[$attrName];
+                        } else {
+                            $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $attrVal;
+                        }
                     }
                 }
+
+                # Pickware stock fields
+                if ( isset($detail['attribute']['pickwarePhysicalStockForSale']) ) {
+                    $item['pickware']['physicalStockForSale'] = $detail['attribute']['pickwarePhysicalStockForSale'];
+                    $item['pickware']['reservedStock'] = ($detail['attribute']['pickwarePhysicalStockForSale'] - $detail['inStock']);
+                }
+
             }
 
             $result[] = $item;

@@ -22,26 +22,15 @@ class Article implements SubscriberInterface
     {
         $request = $args->getRequest();
 
-        if ( $request->getActionName() == 'save' ) {
+        $action = $request->getActionName();
+
+        if ( $action == 'save' || $action == 'saveDetail' ) {
 
             if ( $this->resChannablePostUpdates ) {
 
                 $webhook = Shopware()->Container()->get('reschannable_service_plugin.webhook');
                 $webhook->updateChannableForAllShops($this->resChannablePostData['number']);
-
             }
-
-        }
-
-        if ( $request->getActionName() == 'saveDetail' ) {
-
-            if ( $this->resChannablePostUpdates ) {
-
-                $webhook = Shopware()->Container()->get('reschannable_service_plugin.webhook');
-                $webhook->updateChannableForAllShops($this->resChannablePostData['number']);
-
-            }
-
         }
     }
 

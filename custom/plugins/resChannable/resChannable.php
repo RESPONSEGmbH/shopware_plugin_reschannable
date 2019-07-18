@@ -63,7 +63,12 @@ class resChannable extends Plugin
         $this->container->get('Template')->addTemplateDir(
             $this->getPath() . '/Resources/views/'
         );
-        $args->getSubject()->View()->extendsTemplate('backend/reschannable/index/header.tpl');
+
+        /*if (version_compare(Shopware()->Config()->get('version'), '5.6.0', '>=')) {
+            $args->getSubject()->View()->extendsTemplate('backend/reschannable/index/header56.tpl');
+        } else {
+            $args->getSubject()->View()->extendsTemplate('backend/reschannable/index/header.tpl');
+        }*/
     }
 
     /**

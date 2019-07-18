@@ -4,12 +4,33 @@
     <label lang="de">Channable Connector</label>
     <label lang="en">Channable Connector</label>
 
-    <version>1.6.2</version>
+    <version>1.7.0</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>MIT</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+
+    <changelog version="1.7.0">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Shopware 5.6 Kompatibilität</li>
+                    <li>Feature: Pickware Bestandsdaten (Reservierter und physischer Bestand)</li>
+                    <li>Bugfix: Webhook nach der Bestellung korrigiert</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes lang="en">
+            <![CDATA[
+                <ul>
+                    <li>Shopware 5.6 compatibility</li>
+                    <li>Feature: Pickware stock data (reserved and physical stock)</li>
+                    <li>Bugfix: Webhook corrected after ordering</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
 
     <changelog version="1.6.2">
         <changes lang="de">

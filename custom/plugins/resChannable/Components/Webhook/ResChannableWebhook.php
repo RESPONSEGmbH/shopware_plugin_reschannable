@@ -5,8 +5,10 @@ namespace resChannable\Components\Webhook;
 use Doctrine\DBAL\Connection;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\CachedConfigReader;
-use Shopware\Bundle\StoreFrontBundle\Struct;
 use Shopware\Bundle\StoreFrontBundle\Service;
+use Shopware\Models\Article\Repository as ArticleRepository;
+use Shopware\Models\Shop\Repository as ShopRepository;
+use Shopware\Models\Shop\Shop;
 
 class ResChannableWebhook
 {
@@ -42,6 +44,16 @@ class ResChannableWebhook
     private $config = null;
 
     /**
+     * @var ArticleRepository
+     */
+    private $detailRepository = null;
+
+    /**
+     * @var ShopRepository
+     */
+    private $shopRepository = null;
+
+    /**
      * @param Connection                          $connection
      * @param ModelManager                        $entityManager
      * @param CachedConfigReader                  $configReader
@@ -66,8 +78,8 @@ class ResChannableWebhook
     /**
      * Update Channable product data
      *
-     * @param $number
-     * @param \Shopware\Models\Shop\Shop $shop
+     * @param string $number
+     * @param Shop $shop
      */
     public function updateChannable($number, $shop)
     {
@@ -98,37 +110,21 @@ class ResChannableWebhook
         $shops = $this->getShopRepository()->getActiveShops();
 
         foreach ( $shops as $shop ) {
-
-            $config = $this->configReader->getByPluginName('resChannable', $shop);
-
-            if ( !$config['apiAllowRealTimeUpdates'] || !$config['apiWebhookUrl'] )
-                continue;
-
-            # Get article data
-            $article = $this->_getArticleData($number, $shop);
-
-            # Do nothing if article data not found
-            if ( !$article )
-                continue;
-
-            # Post stock data
-            $this->_postData(array($article), $config['apiWebhookUrl'], $shop);
+            $this->updateChannable($number,$shop);
         }
     }
 
     /**
      * Get plugin config
      *
-     * @param \Shopware\Models\Shop\Shop $shop
+     * @param Shop $shop
+     *
      * @return array|mixed
      */
     private function _getPluginConfig($shop)
     {
-        if ( $this->config === null ) {
-
+        if ( $this->config === null )
             $this->config = $this->configReader->getByPluginName('resChannable', $shop);
-
-        }
 
         return $this->config;
     }
@@ -136,10 +132,10 @@ class ResChannableWebhook
     /**
      * Get article data for webhook post
      *
-     * @param $number
-     * @param \Shopware\Models\Shop\Shop $shop
+     * @param string $number
+     * @param Shop $shop
      *
-     * @return array|void
+     * @return array
      */
     private function _getArticleData($number, $shop)
     {
@@ -154,16 +150,16 @@ class ResChannableWebhook
         if ( !$config['apiAllowRealTimeUpdates'] )
             return;
 
-        $translations = $this->getTranslations($articleId,$shop->getId());
-        $prices = $this->getPrices($detailId,$article->getTax()->getTax());
-        $inStock = $detail->getInStock();
+        $translations = $this->_getTranslations($articleId,$shop->getId());
+        $prices = $this->_getPrices($detailId,$article->getTax()->getTax());
+        $additionalData = $this->_getDetailData($number);
 
         $item = array();
         $item['id'] = $detailId;
         $item['articleId'] = $articleId;
         $item['number'] = $number;
         $item['name'] = $article->getName();
-        $item['stock'] = $inStock;
+        $item['stock'] = $additionalData['instock'];
         $item['stockTracking'] = ( $article->getLastStock() === true );
         $item['price'] = $prices[0]['price'];
         $item['ean'] = $detail->getEan();
@@ -172,18 +168,24 @@ class ResChannableWebhook
             $item['name'] = $translations['name'];
         }
 
+        # Pickware stock fields
+        if ( isset($additionalData['pickware_physical_stock_for_sale']) ) {
+            $item['pickware']['physicalStockForSale'] = $additionalData['pickware_physical_stock_for_sale'];
+            $item['pickware']['reservedStock'] = ($additionalData['pickware_physical_stock_for_sale'] - $additionalData['instock']);
+        }
+
         return $item;
     }
 
     /**
      * Internal helper function to load the article main detail prices into the backend module.
      *
-     * @param $id
-     * @param $tax
+     * @param int $id
+     * @param decimal $tax
      *
      * @return array
      */
-    protected function getPrices($id, $tax)
+    protected function _getPrices($id, $tax)
     {
         $prices = $this->getDetailRepository()
             ->getPricesQuery($id)
@@ -195,8 +197,8 @@ class ResChannableWebhook
     /**
      * Internal helper function to convert gross prices to net prices.
      *
-     * @param $prices
-     * @param $tax
+     * @param array $prices
+     * @param decimal $tax
      *
      * @return array
      */
@@ -217,21 +219,27 @@ class ResChannableWebhook
     /**
      * Internal helper function to get access to the article repository.
      *
-     * @return Shopware\Models\Article\Repository
+     * @return ArticleRepository
      */
     protected function getDetailRepository()
     {
-        return $this->entityManager->getRepository('Shopware\Models\Article\Detail');
+        if ( $this->detailRepository === null )
+            $this->detailRepository = $this->entityManager->getRepository('Shopware\Models\Article\Detail');
+
+        return $this->detailRepository;
     }
 
     /**
      * Get shop repository
      *
-     * @return \Shopware\Models\Shop\Repository
+     * @return ShopRepository
      */
     public function getShopRepository()
     {
-        return $this->entityManager->getRepository('Shopware\Models\Shop\Shop');
+        if ( $this->shopRepository === null )
+            $this->shopRepository = $this->entityManager->getRepository('Shopware\Models\Shop\Shop');
+
+        return $this->shopRepository;
     }
 
     /**
@@ -239,7 +247,7 @@ class ResChannableWebhook
      *
      * @param array $data
      * @param string $url
-     * @param \Shopware\Models\Shop\Shop $shop
+     * @param Shop $shop
      */
     private function _postData($data, $url, $shop)
     {
@@ -269,11 +277,12 @@ class ResChannableWebhook
     /**
      * Get article translations
      *
-     * @param $articleId
-     * @param $shopId
+     * @param int $articleId
+     * @param int $shopId
+     *
      * @return array
      */
-    private function getTranslations($articleId,$shopId)
+    private function _getTranslations($articleId,$shopId)
     {
         $builder = $this->connection->createQueryBuilder();
         $builder->select(array(
@@ -293,6 +302,31 @@ class ResChannableWebhook
         $languages = $statement->fetch(\PDO::FETCH_ASSOC);
 
         return $languages;
+    }
+
+    /**
+     * Get detail data. Not loaded via the entity as stock will not be saved during the ordering process
+     *
+     * @param string $number
+     * @return array
+     */
+    private function _getDetailData($number)
+    {
+        $sql = '
+            SELECT IF(ad.instock < 0, 0, ad.instock) as instock, aa.*
+            FROM s_articles a
+            LEFT JOIN s_articles_details ad
+            ON ad.ordernumber=?
+            LEFT JOIN s_articles_attributes aa
+            ON ad.id = aa.articledetailsID
+            WHERE a.id=ad.articleID
+        ';
+
+        $detail = Shopware()->Db()->fetchRow($sql, [
+            $number
+        ]);
+
+        return $detail;
     }
 
 }
