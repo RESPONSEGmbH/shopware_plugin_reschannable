@@ -142,6 +142,9 @@ class ResChannableWebhook
         $config = $this->_getPluginConfig($shop);
 
         $detail = $this->getDetailRepository()->findOneBy(array('number' => $number));
+        if ( !$detail instanceof \Shopware\Models\Article\Detail )
+            return;
+        
         /** @var \Shopware\Models\Article\Article $article */
         $article = $detail->getArticle();
         $detailId = $detail->getId();
