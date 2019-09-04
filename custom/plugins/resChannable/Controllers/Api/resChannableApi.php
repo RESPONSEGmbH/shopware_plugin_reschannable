@@ -3,6 +3,7 @@
 use Shopware\Components\Api\Exception\NotFoundException;
 use Shopware\Components\Api\Exception\ParameterMissingException;
 use Shopware\Components\Api\Manager;
+use Symfony\Component\DependencyInjection\Container;
 
 /**
  * Channable API controller
@@ -97,9 +98,9 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     private $pluginConfig = null;
 
     /**
-     * @var \Shopware\Bundle\AttributeBundle\Service\ConfigurationStruct[]
+     * @var string[]
      */
-    private $articleAttributeConfig = null;
+    private $articleAttributeConfig = [];
 
     /**
      * Init function
@@ -144,7 +145,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         foreach ($articleAttributes as $attribute) {
             if ( !$attribute->isIdentifier() && $attribute->isConfigured() )
-                $this->articleAttributeConfig[$attribute->getColumnName()] = $attribute->getLabel();
+                $this->articleAttributeConfig[lcfirst(Container::camelize($attribute->getColumnName()))] = $attribute->getLabel();
         }
 
         $this->channableArticleResource = Manager::getResource('ResChannableArticle');
