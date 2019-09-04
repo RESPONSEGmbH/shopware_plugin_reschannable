@@ -98,9 +98,9 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     private $pluginConfig = null;
 
     /**
-     * @var string[]
+     * @var array
      */
-    private $articleAttributeConfig = [];
+    private $articleAttributeConfig = array();
 
     /**
      * Init function
@@ -128,11 +128,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $this->mainShop = $this->shop->getMain();
 
-        if ( $this->mainShop ) {
+        if ( $this->mainShop )
             $this->mainShopId = $this->mainShop->getId();
-        } else {
+        else
             $this->mainShopId = $this->shopId;
-        }
 
         $this->admin = Shopware()->Modules()->Admin();
         $this->export = Shopware()->Modules()->Export();
@@ -153,11 +152,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $this->translationResource = Manager::getResource('Translation');
         $this->config = Shopware()->Config();
 
-        if (version_compare($this->config->get('version'), '5.6.0', '>=')) {
+        if (version_compare($this->config->get('version'), '5.6.0', '>='))
             $this->translationComponent = new Shopware_Components_Translation($this->container->get('dbal_connection'),$this->container);
-        } else {
+        else
             $this->translationComponent = new Shopware_Components_Translation();
-        }
 
         $this->configUnits = array_shift(array_values($this->translationComponent->read($this->shopId,'config_units')));
 
@@ -199,7 +197,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                 $this->_saveWebHookUrl($url);
 
                 break;
-
         }
 
         $this->View()->assign($result);
@@ -231,43 +228,33 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $images = $imageArticle['images'];
 
             # If main article without variants set article images
-            if ( !$images ) {
+            if ( !$images )
                 $images = $imageArticle['article']['images'];
-            }
 
             # If plugin setting "only articles with images" is set
-            if ( $this->pluginConfig['apiOnlyArticlesWithImg'] && empty($images) ) {
+            if ( $this->pluginConfig['apiOnlyArticlesWithImg'] && empty($images) )
                 continue;
-            }
 
             # Replace translations if exist
             $translationVariant = $this->translationComponent->read($this->shopId,'variant',$articleId);
             $translations = $this->getTranslations($articleId,$this->shopId);
 
-            if ( !empty($translations['name']) ) {
+            if ( !empty($translations['name']) )
                 $article['name'] = $translations['name'];
-            }
-            if ( !empty($translations['description']) ) {
+            if ( !empty($translations['description']) )
                 $article['description'] = $translations['description'];
-            }
-            if ( !empty($translations['descriptionLong']) ) {
+            if ( !empty($translations['descriptionLong']) )
                 $article['descriptionLong'] = $translations['descriptionLong'];
-            }
-            if ( !empty($translations['keywords']) ) {
+            if ( !empty($translations['keywords']) )
                 $article['keywords'] = $translations['keywords'];
-            }
-            if ( !empty($translationVariant['additionalText']) ) {
+            if ( !empty($translationVariant['additionalText']) )
                 $detail['additionalText'] = $translationVariant['additionalText'];
-            }
-            if ( !empty($translationVariant['packUnit']) ) {
+            if ( !empty($translationVariant['packUnit']) )
                 $detail['packUnit'] = $translationVariant['packUnit'];
-            }
-            if ( !empty($this->configUnits['unit']) && !empty($detail['unit']['unit']) ) {
+            if ( !empty($this->configUnits['unit']) && !empty($detail['unit']['unit']) )
                 $detail['unit']['unit'] = $this->configUnits['unit'];
-            }
-            if ( !empty($this->configUnits['description']) && !empty($detail['unit']['name']) ) {
+            if ( !empty($this->configUnits['description']) && !empty($detail['unit']['name']) )
                 $detail['unit']['name'] = $this->configUnits['description'];
-            }
 
             $item = array();
 
@@ -296,11 +283,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['rewriteUrl'] = $links['rewrite'];
 
             # Only show stock if instock exceeds minpurchase
-            if ( $detail['inStock'] >= $detail['minPurchase']) {
+            if ( $detail['inStock'] >= $detail['minPurchase'])
                 $item['stock'] = $detail['inStock'];
-            } else {
+            else
                 $item['stock'] = 0;
-            }
 
             # Price
             $item['prices'] = $this->channableArticleResource->getPrices($detail['id'],$article['tax']['tax'],$this->shop->getCustomerGroup()->getId(),$this->shop->getCustomerGroup()->getTax());
@@ -709,15 +695,13 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             $propertyOption = $this->translationComponent->read($this->shopId,'propertyoption',$propertyValues[$i]['optionId']);
 
-            if ( !empty($propertyOption['optionName']) ) {
+            if ( !empty($propertyOption['optionName']) )
                 $propertyValues[$i]['option']['name'] = $propertyOption['optionName'];
-            }
 
             $propertyValue = $this->translationComponent->read($this->shopId,'propertyvalue',$propertyValues[$i]['id']);
 
-            if ( !empty($propertyValue['optionValue']) ) {
+            if ( !empty($propertyValue['optionValue']) )
                 $propertyValues[$i]['value'] = $propertyValue['optionValue'];
-            }
 
             $properties[$this->filterFieldNames($propertyValues[$i]['option']['name'])][] = $propertyValues[$i]['value'];
         }
@@ -775,14 +759,11 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
                 $configuratorOption = $this->translationComponent->read($this->shopId,'configuratoroption',$detail['configuratorOptions'][$i]['id']);
 
-                if ( !empty($configuratorOption['name']) ) {
+                if ( !empty($configuratorOption['name']) )
                     $detail['configuratorOptions'][$i]['name'] = $configuratorOption['name'];
-                }
 
                 $options[$this->filterFieldNames($detail['configuratorOptions'][$i]['group']['name'])] = $detail['configuratorOptions'][$i]['name'];
-
             }
-
         }
 
         return $options;
@@ -802,12 +783,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         if ( $grp ) {
 
-            for ($i = 0; $i < sizeof($grp); $i++) {
-
+            for ($i = 0; $i < sizeof($grp); $i++)
                 $groups[$this->filterFieldNames($grp[$i]['key'])] = $grp[$i]['name'];
-
-            }
-
         }
 
         return $groups;
