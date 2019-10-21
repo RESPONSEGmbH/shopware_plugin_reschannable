@@ -156,16 +156,17 @@ class ResChannableWebhook
         $translations = $this->_getTranslations($articleId,$shop->getId());
         $prices = $this->_getPrices($detailId,$article->getTax()->getTax());
         $additionalData = $this->_getDetailData($number);
+        $ean = $detail->getEan();
 
         $item = array();
-        $item['id'] = $detailId;
-        $item['articleId'] = $articleId;
+        $item['id'] = (int)$detailId;
+        $item['articleId'] = (int)$articleId;
         $item['number'] = $number;
         $item['name'] = $article->getName();
-        $item['stock'] = $additionalData['instock'];
+        $item['stock'] = (int)$additionalData['instock'];
         $item['stockTracking'] = ( $article->getLastStock() === true );
         $item['price'] = $prices[0]['price'];
-        $item['ean'] = $detail->getEan();
+        $item['ean'] = ( empty($ean) ? '' : $ean );
 
         if ( !empty($translations['name']) ) {
             $item['name'] = $translations['name'];
@@ -173,8 +174,8 @@ class ResChannableWebhook
 
         # Pickware stock fields
         if ( isset($additionalData['pickware_physical_stock_for_sale']) ) {
-            $item['pickware']['physicalStockForSale'] = $additionalData['pickware_physical_stock_for_sale'];
-            $item['pickware']['reservedStock'] = ($additionalData['pickware_physical_stock_for_sale'] - $additionalData['instock']);
+            $item['pickware']['physicalStockForSale'] = (int)$additionalData['pickware_physical_stock_for_sale'];
+            $item['pickware']['reservedStock'] = ((int)$additionalData['pickware_physical_stock_for_sale'] - (int)$additionalData['instock']);
         }
 
         return $item;
@@ -325,9 +326,9 @@ class ResChannableWebhook
             WHERE a.id=ad.articleID
         ';
 
-        $detail = Shopware()->Db()->fetchRow($sql, [
+        $detail = Shopware()->Db()->fetchRow($sql, array(
             $number
-        ]);
+        ));
 
         return $detail;
     }
