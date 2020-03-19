@@ -236,15 +236,15 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                 continue;
 
             # Replace translations if exist
-            $translationVariant = $this->translationComponent->read($this->shopId,'variant',$articleId);
+            $translationVariant = $this->translationComponent->read($this->shopId,'variant',$detail['id']);
             $translations = $this->getTranslations($articleId,$this->shopId);
 
             if ( !empty($translations['name']) )
                 $article['name'] = $translations['name'];
             if ( !empty($translations['description']) )
                 $article['description'] = $translations['description'];
-            if ( !empty($translations['descriptionLong']) )
-                $article['descriptionLong'] = $translations['descriptionLong'];
+            if ( !empty($translations['description_long']) )
+                $article['descriptionLong'] = $translations['description_long'];
             if ( !empty($translations['keywords']) )
                 $article['keywords'] = $translations['keywords'];
             if ( !empty($translationVariant['additionalText']) )
@@ -340,7 +340,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['properties'] = $this->getArticleProperties($detail['id']);
 
             # Configuration
-            $item['options'] = $this->getDetailConfiguratiorOptions($detail['id']);
+            $item['options'] = $this->getDetailConfiguratorOptions($detail['id']);
 
             # Similar
             $item['similar'] = $this->channableArticleResource->getArticleSimilar($articleId);
@@ -686,24 +686,46 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
      */
     private function getArticleProperties($detailId)
     {
-        $detail = $this->channableArticleResource->getArticleProperties($detailId);
+        $detail = $this->channableArticleResource->getArticleProperties($detailId, $this->pluginConfig['properties'], $this->config->get('version'));
 
         $propertyValues = $detail['article']['propertyValues'];
 
         $properties = array();
         for ( $i = 0; $i < sizeof($propertyValues); $i++) {
 
-            $propertyOption = $this->translationComponent->read($this->shopId,'propertyoption',$propertyValues[$i]['optionId']);
+            # Check option translation
+            $propertyOptionLng = $this->translationComponent->read($this->shopId,'propertyoption',$propertyValues[$i]['optionId']);
 
-            if ( !empty($propertyOption['optionName']) )
-                $propertyValues[$i]['option']['name'] = $propertyOption['optionName'];
+            $optionName = $this->filterFieldNames($propertyValues[$i]['option']['name']);
 
-            $propertyValue = $this->translationComponent->read($this->shopId,'propertyvalue',$propertyValues[$i]['id']);
+            if ( !empty($propertyOptionLng['optionName']) )
+                $propertyValues[$i]['option']['name'] = $propertyOptionLng['optionName'];
 
-            if ( !empty($propertyValue['optionValue']) )
-                $propertyValues[$i]['value'] = $propertyValue['optionValue'];
+            # Check value translation
+            $propertyValueLng = $this->translationComponent->read($this->shopId,'propertyvalue',$propertyValues[$i]['id']);
 
-            $properties[$this->filterFieldNames($propertyValues[$i]['option']['name'])][] = $propertyValues[$i]['value'];
+            $optionValue = $this->filterFieldNames($propertyValues[$i]['value']);
+
+            if ( !empty($propertyValueLng['optionValue']) )
+                $propertyValues[$i]['value'] = $propertyValueLng['optionValue'];
+
+            $properties[$optionName][$optionValue]['name'] = $propertyValues[$i]['value'];
+
+            # Attributes
+            if ( isset($propertyValues[$i]['attribute']) ) {
+                foreach ( $propertyValues[$i]['attribute'] as $valAttr => $valAttrVal ) {
+
+                    if ( $valAttr != 'id' && $valAttr != 'propertyValueId' ) {
+
+                        $lngKey = '__attribute_'.$this->camelCaseToUnderscore($valAttr);
+
+                        if ( isset($propertyValueLng[$lngKey]) )
+                            $valAttrVal = $propertyValueLng[$lngKey];
+
+                        $properties[$optionName][$optionValue][$this->filterFieldNames($valAttr)] = $valAttrVal;
+                    }
+                }
+            }
         }
 
         return $properties;
@@ -742,7 +764,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
      * @param $detailId
      * @return array
      */
-    private function getDetailConfiguratiorOptions($detailId)
+    private function getDetailConfiguratorOptions($detailId)
     {
         $detail = $this->channableArticleResource->getDetailConfiguratiorOptions($detailId);
 
@@ -803,7 +825,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         # strip bad chars
         $field = preg_replace('/[^0-9a-zA-Z_]+/','',$field);
 
-        return $field;
+        return strtolower($field);
     }
 
     /**
@@ -821,6 +843,16 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $pluginManager = Shopware()->Container()->get('shopware_plugininstaller.plugin_manager');
         $plugin = $pluginManager->getPluginByName('resChannable');
         $pluginManager->saveConfigElement($plugin, 'apiWebhookUrl', $url, $shop);
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    private function camelCaseToUnderscore($string)
+    {
+        return strtolower(ltrim(preg_replace('/[A-Z]/', '_$0', $string), '_'));
     }
 
 }

@@ -191,4 +191,21 @@ class Shopware_Controllers_Backend_ReschannableArticles extends Shopware_Control
         return array('success' => true, 'counter' => $counter);
     }
 
+    public function getPropertiesAction()
+    {
+        /** @var QueryBuilder $builder */
+        $builder = $this->get('dbal_connection')->createQueryBuilder();
+        $builder->select(array(
+        'propertyGroup.id',
+        'propertyGroup.name'
+        ));
+        $builder->from('s_filter_options', 'propertyGroup');
+        $data = $builder->execute()->fetchAll();
+
+        $this->view->assign([
+            'data' => $data,
+            'total' => count($data),
+        ]);
+    }
+
 }

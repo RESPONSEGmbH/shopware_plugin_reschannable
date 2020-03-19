@@ -46,7 +46,7 @@ class resChannable extends Plugin
     {
         $config = $this->container->get('shopware.plugin.cached_config_reader')->getByPluginName($this->getName());
 
-        if ( !$config['apiAllowRealTimeUpdates'] )
+        if ( !$config['apiAllowRealTimeUpdates'] || !$this->container->has('reschannable_service_plugin.webhook') )
             return;
 
         $webhook = $this->container->get('reschannable_service_plugin.webhook');

@@ -185,7 +185,7 @@ class ResChannableWebhook
      * Internal helper function to load the article main detail prices into the backend module.
      *
      * @param int $id
-     * @param decimal $tax
+     * @param double $tax
      *
      * @return array
      */
@@ -202,7 +202,7 @@ class ResChannableWebhook
      * Internal helper function to convert gross prices to net prices.
      *
      * @param array $prices
-     * @param decimal $tax
+     * @param double $tax
      *
      * @return array
      */

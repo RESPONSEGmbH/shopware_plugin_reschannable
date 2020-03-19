@@ -3,12 +3,32 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="de">Channable Connector</label>
     <label lang="en">Channable Connector</label>
-    <version>1.7.2</version>
+    <version>1.8.0</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>MIT</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.8.0">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Feature: Auswahl der Eigenschaften in den Plugin-Einstellungen.</li>
+                    <li>Feature: Export der Freitextfelder von den Eigenschaften. <span style="color:#f00;font-weight:bold;">Wichtig: Überprüfen Sie das Mapping der Eigenschaften in Channable und passen es entsprechend an.</span></li>
+                    <li>Bugfix: Korrektur Mehrsprachigkeit.</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes lang="en">
+            <![CDATA[
+                <ul>
+                    <li>Feature: Selection of properties in the plugin settings.</li>
+                    <li>Feature: Export of free text fields from properties. <span style="color:#f00;font-weight:bold;">Important: Check the mapping of the properties in Channable and adjust it accordingly.</span></li>
+                    <li>Bugfix: Correction multilingualism.</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.7.2">
         <changes lang="de">
             <![CDATA[

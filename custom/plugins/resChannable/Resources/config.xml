@@ -31,6 +31,70 @@
                 <minValue>5</minValue>
             </options>
         </element>
+        <element scope="shop" type="select">
+            <name>properties</name>
+            <label lang="de">Eigenschaften</label>
+            <label lang="en">Properties</label>
+            <value></value>
+            <store><![CDATA[Ext.define('Shopware.apps.Reschannable.store.Properties', {
+    extend: 'Ext.data.Store',
+    fields: [
+        { name:'id', type: 'int' },
+        { name:'name', type: 'string' }
+    ],
+    autoLoad: true,
+    autoSync: true,
+    pageSize: 25,
+    constructor: function () {
+        var me = this,
+            proxy = null,
+            controllerHttpStatus = false;
+
+        proxy = {
+
+            type: 'ajax',
+            url: window.location.href.substr(0, window.location.href.indexOf('backend')) + 'backend/ReschannableArticles/getProperties/',
+            reader: {
+                type: 'json',
+                root: 'data',
+                totalProperty: 'total'
+            }
+
+        };
+
+        Ext.Ajax.request
+        ({
+            url: window.location.href.substr(0, window.location.href.indexOf('backend')) + 'backend/ReschannableArticles/getProperties/',
+            async: false,
+            method: 'POST',
+            success: function(response)
+            {
+                controllerHttpStatus = response.status;
+            },
+            failure: function(response)
+            {
+                controllerHttpStatus = response.status;
+            }
+        });
+
+        if ( controllerHttpStatus != "404" ) {
+            try {
+                me.setProxy(proxy);
+                me.callParent(arguments);
+            } catch(e) {}
+        }
+
+    }
+
+    }).create();//new ]]>
+            </store>
+            <options>
+                <multiSelect>true</multiSelect>
+                <valueField>id</valueField>
+                <displayField>name</displayField>
+                <isCustomStore>true</isCustomStore>
+            </options>
+        </element>
         <element type="boolean" scope="shop">
             <name>apiAllowRealTimeUpdates</name>
             <label lang="de"><![CDATA[Echtzeit Produkt-Updates aktivieren]]></label>
@@ -60,7 +124,6 @@
                 <handler>
                     <![CDATA[
                     function(button) {
-
                         Ext.Ajax.request({
                         url: 'ReschannableAutoConnect/getUrl/',
                         params: {

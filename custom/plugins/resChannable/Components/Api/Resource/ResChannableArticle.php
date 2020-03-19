@@ -298,38 +298,48 @@ class ResChannableArticle extends Resource
             ->where('detail.id = :detailId')
             ->setParameter('detailId', $detailId);
 
-        $images = $this->getSingleResult($builder);
-
-        return $images;
+        return $this->getSingleResult($builder);
     }
 
     /**
      * Get article properties
      *
-     * @param $detailId
+     * @param int $detailId
+     * @param array $propertyIds
+     * @param string $shopVersion
      * @return array
      */
-    public function getArticleProperties($detailId)
+    public function getArticleProperties($detailId, $propertyIds, $shopVersion)
     {
         $builder = $this->getManager()->createQueryBuilder();
         $builder->select(array(
             'detail',
             'article',
             'propertyValues',
+            'propertyValuesAttributes',
             'propertyOption',
             'propertyGroup',
         ))
             ->from('Shopware\Models\Article\Detail', 'detail')
             ->join('detail.article', 'article')
             ->join('article.propertyValues', 'propertyValues')
+            ->leftJoin('propertyValues.attribute', 'propertyValuesAttributes')
             ->join('propertyValues.option', 'propertyOption')
             ->join('article.propertyGroup', 'propertyGroup')
             ->where('detail.id = :detailId')
             ->setParameter('detailId', $detailId);
 
-        $properties = $this->getSingleResult($builder);
+        if (version_compare($shopVersion, '5.5.0', '>=')) {
+            $builder
+                ->andWhere('propertyOption.id IN (:propertyIds)')
+                ->setParameter('propertyIds', $propertyIds, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
+        } else {
+            $builder
+                ->andWhere('propertyOption.name IN (:propertyIds)')
+                ->setParameter('propertyIds', $propertyIds, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+        }
 
-        return $properties;
+        return $this->getSingleResult($builder);
     }
 
     /**
@@ -352,9 +362,7 @@ class ResChannableArticle extends Resource
             ->where('detail.id = :detailId')
             ->setParameter('detailId', $detailId);
 
-        $options = $this->getSingleResult($builder);
-
-        return $options;
+        return $this->getSingleResult($builder);
     }
 
     /**
