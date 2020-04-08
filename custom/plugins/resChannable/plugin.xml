@@ -3,12 +3,28 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="de">Channable Connector</label>
     <label lang="en">Channable Connector</label>
-    <version>1.8.0</version>
+    <version>1.8.1</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>MIT</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.8.1">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Bugfix: Export ist abgebrochen, wenn in den Plugin-Einstellungen keine Eigenschaften ausgewählt wurden</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes lang="en">
+            <![CDATA[
+                <ul>
+                    <li>Bugfix: Export did not work if no properties has been selected in the plugin settings</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.8.0">
         <changes lang="de">
             <![CDATA[

@@ -337,7 +337,11 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['shippingCosts'] = $this->getShippingCosts($detail);
 
             # Properties
-            $item['properties'] = $this->getArticleProperties($detail['id']);
+            if (!empty($this->pluginConfig['properties'])) {
+                $item['properties'] = $this->getArticleProperties($detail['id']);
+            } else {
+                $item['properties'] = [];
+            }
 
             # Configuration
             $item['options'] = $this->getDetailConfiguratorOptions($detail['id']);
