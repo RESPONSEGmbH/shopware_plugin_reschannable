@@ -338,7 +338,12 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             # Properties
             if (!empty($this->pluginConfig['properties'])) {
-                $item['properties'] = $this->getArticleProperties($detail['id']);
+                foreach ($this->getArticleProperties($detail['id']) as $sKey => $sValue) {
+                    $item['properties'][$sKey] = $sValue;
+                    #$item['properties_' . $sKey] = $sValue;
+                }
+
+                #$item['properties'] = $this->getArticleProperties($detail['id']);
             } else {
                 $item['properties'] = [];
             }
@@ -695,6 +700,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $propertyValues = $detail['article']['propertyValues'];
 
         $properties = array();
+
         for ( $i = 0; $i < sizeof($propertyValues); $i++) {
 
             # Check option translation
@@ -713,7 +719,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             if ( !empty($propertyValueLng['optionValue']) )
                 $propertyValues[$i]['value'] = $propertyValueLng['optionValue'];
 
-            $properties[$optionName][$optionValue]['name'] = $propertyValues[$i]['value'];
+            #$properties[$optionName][$optionValue]['name'] = $propertyValues[$i]['value'];
+            $properties[$optionName] = $propertyValues[$i]['value'];
 
             # Attributes
             if ( isset($propertyValues[$i]['attribute']) ) {
@@ -726,7 +733,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                         if ( isset($propertyValueLng[$lngKey]) )
                             $valAttrVal = $propertyValueLng[$lngKey];
 
-                        $properties[$optionName][$optionValue][$this->filterFieldNames($valAttr)] = $valAttrVal;
+                        #$properties[$optionName][$optionValue][$this->filterFieldNames($valAttr)] = $valAttrVal;
+                        $properties[$optionName . "_" . $this->filterFieldNames($valAttr)] = $valAttrVal;
                     }
                 }
             }
