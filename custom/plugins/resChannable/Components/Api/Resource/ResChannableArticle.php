@@ -159,7 +159,6 @@ class ResChannableArticle extends Resource
                 'subId' => $shopId,
                 'orgPath' => 'sViewport=detail&sArticle='.$articleId
             )
-
         );
 
         return $url;
@@ -214,11 +213,15 @@ class ResChannableArticle extends Resource
     /**
      * Get price lists
      *
-     * @param $articleDetailId
+     * @param int $articleDetailId
+     * @param int $tax
+     * @param int $customerGroup
+     * @param bool $calcBrutto
+     * @param bool $loadFallback
      *
      * @return \Doctrine\ORM\QueryBuilder
      */
-    public function getPrices($articleDetailId, $tax, $customerGroup,$calcBrutto)
+    public function getPrices($articleDetailId, $tax, $customerGroup, $calcBrutto, $loadFallback = false)
     {
         $builder = $this->getManager()->createQueryBuilder();
 
@@ -234,7 +237,7 @@ class ResChannableArticle extends Resource
         $prices = $this->getFullResult($builder);
 
         # No own prices found?
-        if ( !$prices ) {
+        if ( !$prices && $loadFallback ) {
 
             # Load prices from fallback customer group EK
             $builder = $this->getManager()->createQueryBuilder();
@@ -248,23 +251,19 @@ class ResChannableArticle extends Resource
                 ->addOrderBy('prices.from', 'ASC');
 
             $prices = $this->getFullResult($builder);
-
         }
 
         $priceList = array();
         foreach ( $prices as $price ) {
 
             $pr = array(
-
                 'priceNetto' => $price['price'],
                 'priceBrutto' => ( $calcBrutto ? round($price['price'] * (($tax + 100) / 100),2) : $price['price']),
                 'pseudoPriceNetto' => $price['pseudoPrice'],
                 'pseudoPriceBrutto' => round($price['pseudoPrice'] * (($tax + 100) / 100),2)
-
             );
 
             $priceList[$this->filterFieldNames($price['customerGroupKey'])]['from_'.$price['from'].'_to_'.$price['to']] = $pr;
-
         }
 
         return $priceList;

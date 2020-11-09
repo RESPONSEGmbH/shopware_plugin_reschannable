@@ -31,6 +31,19 @@
                 <minValue>5</minValue>
             </options>
         </element>
+        <element type="combo">
+            <name>priceLists</name>
+            <label lang="de">Preislisten</label>
+            <label lang="en">Price lists</label>
+            <description lang="de"><![CDATA[Hier können zusätzliche Preislisten übertragen werden.]]></description>
+            <description lang="en">Additional price lists can be transferred here.</description>
+            <store>Shopware.apps.Base.store.CustomerGroup</store>
+            <options>
+                <multiSelect>true</multiSelect>
+                <valueField>id</valueField>
+                <displayField>name</displayField>
+            </options>
+        </element>
         <element scope="shop" type="select">
             <name>properties</name>
             <label lang="de">Eigenschaften</label>
@@ -97,7 +110,7 @@
         </element>
         <element type="boolean" scope="shop">
             <name>apiAllowRealTimeUpdates</name>
-            <label lang="de"><![CDATA[Echtzeit Produkt-Updates aktivieren]]></label>
+            <label lang="de">Echtzeit Produkt-Updates aktivieren</label>
             <label lang="en">Enable real-time product updates</label>
             <value>true</value>
             <description lang="de"><![CDATA[Aktivieren Sie diese Funktion, wenn Ihre Bestände mit Channable in Echtzeit abgeglichen werden sollen.]]></description>
@@ -105,7 +118,7 @@
         </element>
         <element scope="shop">
             <name>apiWebhookUrl</name>
-            <label lang="de"><![CDATA[Webhook URL]]></label>
+            <label lang="de">Webhook URL</label>
             <label lang="en">Webhook url</label>
             <value></value>
             <description lang="de"><![CDATA[An diese URL werden Ihre aktuellen Bestände geschickt, sobald sich der Bestand eines Artikels ändert. Diese URL darf nicht geändert werden.]]></description>

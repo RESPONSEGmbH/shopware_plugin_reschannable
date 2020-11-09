@@ -28,11 +28,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     protected $mediaResource = null;
 
     /**
-     * @var \Shopware\Components\Api\Resource\Translation
-     */
-    protected $translationResource = null;
-
-    /**
      * @var Shopware_Components_Translation
      */
     protected $translationComponent = null;
@@ -143,13 +138,16 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $articleAttributes = $this->container->get('shopware_attribute.crud_service')->getList('s_articles_attributes');
 
         foreach ($articleAttributes as $attribute) {
-            if ( !$attribute->isIdentifier() && $attribute->isConfigured() )
-                $this->articleAttributeConfig[lcfirst(Container::camelize($attribute->getColumnName()))] = $attribute->getLabel();
+            if ( !$attribute->isIdentifier() && $attribute->isConfigured() ) {
+                $this->articleAttributeConfig[lcfirst(Container::camelize($attribute->getColumnName()))] = array(
+                    'label' => $attribute->getLabel(),
+                    'columnName' => $attribute->getColumnName()
+                );
+            }
         }
 
         $this->channableArticleResource = Manager::getResource('ResChannableArticle');
         $this->mediaResource = Manager::getResource('Media');
-        $this->translationResource = Manager::getResource('Translation');
         $this->config = Shopware()->Config();
 
         if (version_compare($this->config->get('version'), '5.6.0', '>='))
@@ -237,7 +235,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             # Replace translations if exist
             $translationVariant = $this->translationComponent->read($this->shopId,'variant',$detail['id']);
-            $translations = $this->getTranslations($articleId,$this->shopId);
+            $translations = $this->translationComponent->read($this->shopId,'article',$articleId);
 
             if ( !empty($translations['name']) )
                 $article['name'] = $translations['name'];
@@ -282,14 +280,28 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['url'] = $links['url'];
             $item['rewriteUrl'] = $links['rewrite'];
 
+            # stock
             # Only show stock if instock exceeds minpurchase
             if ( $detail['inStock'] >= $detail['minPurchase'])
                 $item['stock'] = $detail['inStock'];
             else
                 $item['stock'] = 0;
+            $item['minPurchase'] = $detail['minPurchase'];
+            $item['maxPurchase'] = $detail['maxPurchase'];
+            $item['minStock'] = $detail['stockMin'];
+
+            # Article not buyable if stock <= 0
+            $item['lastStock'] = $detail['lastStock'];
 
             # Price
-            $item['prices'] = $this->channableArticleResource->getPrices($detail['id'],$article['tax']['tax'],$this->shop->getCustomerGroup()->getId(),$this->shop->getCustomerGroup()->getTax());
+            $item['purchasePrice'] = ($detail['purchasePrice'] > 0 ? (float) $detail['purchasePrice'] : '' );
+            $item['prices'] = $this->channableArticleResource->getPrices(
+                $detail['id'],
+                $article['tax']['tax'],
+                $this->shop->getCustomerGroup()->getId(),
+                $this->shop->getCustomerGroup()->getTax(),
+                true
+            );
 
             # Set first price of price list in root
             if ( $item['prices'] ) {
@@ -304,6 +316,9 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                     break;
                 }
             }
+
+            # Pricelists
+            $item['additionalPrices'] = $this->getAdditionalPrices($detail['id'],$article['tax']['tax']);
 
             $item['currency'] = $this->shop->getCurrency()->getCurrency();
             $item['taxRate'] = $article['tax']['tax'];
@@ -340,10 +355,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             if (!empty($this->pluginConfig['properties'])) {
                 foreach ($this->getArticleProperties($detail['id']) as $sKey => $sValue) {
                     $item['properties'][$sKey] = $sValue;
-                    #$item['properties_' . $sKey] = $sValue;
                 }
-
-                #$item['properties'] = $this->getArticleProperties($detail['id']);
             } else {
                 $item['properties'] = [];
             }
@@ -362,16 +374,17 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             # Article attributes
             if ( $detail['attribute'] ) {
-                foreach ($detail['attribute'] as $attrName => $attrVal) {
+                foreach ( $this->articleAttributeConfig as $attrField => $aAttribute ) {
 
-                    if (isset($this->articleAttributeConfig[$attrName])) {
+                    $attrLngKey = '__attribute_'.$this->camelCaseToUnderscore($attrField);
 
-                        # Set translations if available
-                        if (!empty($translations[$attrName])) {
-                            $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $translations[$attrName];
-                        } else {
-                            $item['attributes'][$this->filterFieldNames($this->articleAttributeConfig[$attrName])] = $attrVal;
-                        }
+                    # Set translations if available
+                    if ( !empty($translationVariant[$attrLngKey]) ) {
+                        $item['attributes'][$attrField] = $translationVariant[$attrLngKey];
+                    } elseif ( !empty($translations[$attrLngKey]) ) {
+                        $item['attributes'][$attrField] = $translations[$attrLngKey];
+                    } elseif ( !empty($detail['attribute'][$attrField]) ) {
+                        $item['attributes'][$attrField] = $detail['attribute'][$attrField];
                     }
                 }
 
@@ -380,8 +393,23 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                     $item['pickware']['physicalStockForSale'] = $detail['attribute']['pickwarePhysicalStockForSale'];
                     $item['pickware']['reservedStock'] = ($detail['attribute']['pickwarePhysicalStockForSale'] - $detail['inStock']);
                 }
-
             }
+
+            # Added
+            /** @var \DateTime $addedDate */
+            $addedDate = $article['added'];
+            $added = '';
+            if ( $addedDate instanceof \DateTime )
+                $added = $addedDate->format('Y-m-d H:i:s');
+            $item['added'] = $added;
+
+            # Changed
+            /** @var \DateTime $changedDate */
+            $changedDate = $article['changed'];
+            $changed = '';
+            if ( $changedDate instanceof \DateTime )
+                $changed = $changedDate->format('Y-m-d H:i:s');
+            $item['changed'] = $changed;
 
             $result[] = $item;
         }
@@ -473,7 +501,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             } catch ( \Exception $Exception ) {
 
             }
-
         }
 
         return $images;
@@ -574,13 +601,11 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             ) . ' ' . $detail['shippingTime'] . ' ' . Shopware()->Snippets()->getNamespace('frontend/plugins/index/delivery_informations')->get(
                 'DetailDataShippingDays'
             );
-
         } else {
 
             $shippingTime = Shopware()->Snippets()->getNamespace('frontend/plugins/index/delivery_informations')->get(
                 'DetailDataNotAvailable'
             );
-
         }
 
         return $shippingTime;
@@ -601,8 +626,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $categoryList = array();
 
-        foreach ( $categories as $category ) {
-
+        foreach ( $categories as $category )
+        {
             $path = $categoryRepo->getPathById($category['id']);
 
             $categoryList[] = array_values($path);
@@ -666,10 +691,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     private function loadPaymentMethods()
     {
         $builder = Shopware()->Container()->get('dbal_connection')->createQueryBuilder();
-        $builder->select([
+        $builder->select(array(
             'id',
             'name'
-        ]);
+        ));
         $builder->from('s_core_paymentmeans', 'payments');
         $builder->where('payments.active = 1');
 
@@ -714,12 +739,9 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             # Check value translation
             $propertyValueLng = $this->translationComponent->read($this->shopId,'propertyvalue',$propertyValues[$i]['id']);
 
-            $optionValue = $this->filterFieldNames($propertyValues[$i]['value']);
-
             if ( !empty($propertyValueLng['optionValue']) )
                 $propertyValues[$i]['value'] = $propertyValueLng['optionValue'];
 
-            #$properties[$optionName][$optionValue]['name'] = $propertyValues[$i]['value'];
             $properties[$optionName] = $propertyValues[$i]['value'];
 
             # Attributes
@@ -733,7 +755,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                         if ( isset($propertyValueLng[$lngKey]) )
                             $valAttrVal = $propertyValueLng[$lngKey];
 
-                        #$properties[$optionName][$optionValue][$this->filterFieldNames($valAttr)] = $valAttrVal;
                         $properties[$optionName . "_" . $this->filterFieldNames($valAttr)] = $valAttrVal;
                     }
                 }
@@ -741,33 +762,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         }
 
         return $properties;
-    }
-
-    /**
-     * Get article translations
-     *
-     * @param $articleId
-     * @param $shopId
-     * @return array
-     */
-    private function getTranslations($articleId,$shopId)
-    {
-        $builder = Shopware()->Container()->get('dbal_connection')->createQueryBuilder();
-        $builder->select(array(
-            'translations.*'
-        ));
-        $builder->from('s_articles_translations', 'translations');
-        $builder->innerJoin('translations','s_core_shops','shops','translations.languageID = shops.id');
-        $builder->innerJoin('shops','s_core_locales','locales','shops.locale_id = locales.id');
-        $builder->where('translations.articleID = :articleId');
-        $builder->andWhere('translations.languageID = :languageID');
-        $builder->setParameter('articleId',$articleId);
-        $builder->setParameter('languageID',$shopId);
-
-        $statement = $builder->execute();
-        $languages = $statement->fetch(\PDO::FETCH_ASSOC);
-
-        return $languages;
     }
 
     /**
@@ -865,6 +859,31 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     private function camelCaseToUnderscore($string)
     {
         return strtolower(ltrim(preg_replace('/[A-Z]/', '_$0', $string), '_'));
+    }
+
+    /**
+     * @param int $detailID
+     * @param int $tax
+     *
+     * @return string
+     */
+    private function getAdditionalPrices($detailID, $tax)
+    {
+        $customerGroups = $this->pluginConfig['priceLists'];
+
+        $prices = array();
+        $em = $this->getModelManager();
+
+        foreach ( $customerGroups as $id ) {
+
+            /** @var \Shopware\Models\Customer\Group $customerGroup */
+            $customerGroup = $em->find(\Shopware\Models\Customer\Group::class, $id);
+
+            if ( $priceList = $this->channableArticleResource->getPrices($detailID, $tax, $id, $customerGroup->getTax()) )
+                $prices = array_merge($prices,$priceList);
+        }
+
+        return $prices;
     }
 
 }
