@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
-    <label lang="de">Channable Connector</label>
     <label lang="en">Channable Connector</label>
+    <label lang="de">Channable Connector</label>
     <version>1.9.0</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
-    <license>MIT</license>
+    <license>proprietary</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
@@ -401,5 +401,16 @@
         <changes lang="de">Erstveröffentlichung.</changes>
         <changes lang="en">First release.</changes>
     </changelog>
-
+    <description lang="en">
+        <![CDATA[
+   <b>Channable Connector</b>
+   <p>Channable is the ultimate tool for data feed management, marketplace connections and feed- based inventory campaigns. Try Channable for free and choose from more than 1500 channels.</p>
+   ]]>
+    </description>
+    <description lang="de">
+        <![CDATA[
+   <b>Channable Connector</b>
+   <p>Channable ist das ultimative Tool für Datenfeed Management, Marktplatz- Schnittstellen und Feed- basierte Inventarkampagnen. Probieren Sie Channable kostenlos aus!</p>
+   ]]>
+    </description>
 </plugin>
