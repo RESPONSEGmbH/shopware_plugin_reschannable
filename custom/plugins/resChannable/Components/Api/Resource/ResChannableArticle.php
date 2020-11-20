@@ -295,7 +295,8 @@ class ResChannableArticle extends Resource
             ->leftJoin('article.images', 'articleImages')
             ->leftJoin('articleImages.parent', 'articleImageParent')
             ->where('detail.id = :detailId')
-            ->setParameter('detailId', $detailId);
+            ->setParameter('detailId', $detailId)
+            ->addOrderBy('images.position', 'ASC');
 
         return $this->getSingleResult($builder);
     }
