@@ -348,8 +348,9 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             # SEO categories
             $item['seoCategory'] = $this->getArticleSeoCategory($articleId);
 
-            # Shipping costs
-            $item['shippingCosts'] = $this->getShippingCosts($detail);
+            # Shipping costs - disabled regarding individual shipping errors
+            #$item['shippingCosts'] = $this->getShippingCosts($detail);
+            $item['shippingCosts'] = 0;
 
             # Properties
             if (!empty($this->pluginConfig['properties'])) {
