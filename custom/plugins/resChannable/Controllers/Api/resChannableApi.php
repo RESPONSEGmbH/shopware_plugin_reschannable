@@ -241,8 +241,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                 $article['name'] = $translations['name'];
             if ( !empty($translations['description']) )
                 $article['description'] = $translations['description'];
-            if ( !empty($translations['description_long']) )
-                $article['descriptionLong'] = $translations['description_long'];
+            if ( !empty($translations['descriptionLong']) )
+                $article['descriptionLong'] = $translations['descriptionLong'];
             if ( !empty($translations['keywords']) )
                 $article['keywords'] = $translations['keywords'];
             if ( !empty($translationVariant['additionalText']) )
