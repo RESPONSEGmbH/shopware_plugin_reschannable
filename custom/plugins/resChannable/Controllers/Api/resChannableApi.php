@@ -223,7 +223,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             # Image check here because of performance issues
             $imageArticle = $this->channableArticleResource->getArticleImages($detail['id']);
 
-            $images = $imageArticle['images'];
+            $images = $variantImages = $imageArticle['images'];
 
             # If main article without variants set article images
             if ( !$images )
@@ -271,8 +271,18 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             $item['releaseDate'] = $detail['releaseDate'];
 
+            $blIsVariant = $detail['kind'] == 1;
+
             # Images
             $item['images'] = $this->getArticleImagePaths($images);
+
+            if ($blIsVariant) {
+                $item['variant_images'] = $this->getArticleImagePaths($variantImages);
+            } else {
+                $item['variant_images'] = [];
+            }
+
+            $item['is_variant'] = $blIsVariant;
 
             # Links
             $links = $this->getArticleLinks($articleId,$article['name'],$detail['number']);
