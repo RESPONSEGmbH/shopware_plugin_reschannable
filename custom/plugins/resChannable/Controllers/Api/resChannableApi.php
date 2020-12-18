@@ -279,7 +279,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             if ($blIsVariant) {
                 $item['variant_images'] = $this->getArticleImagePaths($variantImages);
             } else {
-                $item['variant_images'] = [];
+                $item['variant_images'] = array();
             }
 
             $item['is_variant'] = $blIsVariant;
@@ -368,7 +368,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                     $item['properties'][$sKey] = $sValue;
                 }
             } else {
-                $item['properties'] = [];
+                $item['properties'] = array();
             }
 
             # Configuration

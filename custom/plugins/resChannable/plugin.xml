@@ -3,12 +3,28 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="en">Channable Connector</label>
     <label lang="de">Channable Connector</label>
-    <version>1.9.3</version>
+    <version>1.10.0</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>proprietary</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.10.0">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Feature: Variantenbilder in einem extra Feld</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes>
+            <![CDATA[
+                <ul>
+                    <li>Feature: Variant images in an extra field</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.9.3">
         <changes lang="de">
             <![CDATA[
