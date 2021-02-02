@@ -745,8 +745,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $properties = array();
 
-        print_r();
-
         for ( $i = 0; $i < sizeof($propertyValues); $i++) {
 
             # Check option translation
