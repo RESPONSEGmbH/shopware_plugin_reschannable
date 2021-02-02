@@ -3,12 +3,32 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="en">Channable Connector</label>
     <label lang="de">Channable Connector</label>
-    <version>1.10.0</version>
+    <version>1.10.1</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>proprietary</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.10.1">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Verbesserung: Es werden auch Bilder ohne Variantenzuordnung exportiert</li>
+                    <li>Verbesserung: Export von "E-Mail Benachrichtigung"</li>
+                    <li>Bugfix: Freitextfelder wurden manchmal nicht exportiert</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes>
+            <![CDATA[
+                <ul>
+                    <li>Improvement: Images without variant assignment are also exported</li>
+                    <li>Improvement: Export of "Email notification"</li>
+                    <li>Bugfix: Free text fields were sometimes not exported</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.10.0">
         <changes lang="de">
             <![CDATA[

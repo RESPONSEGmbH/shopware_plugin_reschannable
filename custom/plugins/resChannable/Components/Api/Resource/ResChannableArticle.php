@@ -4,6 +4,7 @@ namespace resChannable\Components\Api\Resource;
 
 use Shopware\Components\Api\Resource\Resource;
 use Shopware\Components\Model\QueryBuilder;
+use Shopware\Models\Article\Image;
 
 class ResChannableArticle extends Resource
 {
@@ -269,36 +270,40 @@ class ResChannableArticle extends Resource
         return $priceList;
     }
 
-    public function getArticleImages($detailId)
+    public function getDetailImages($detailId)
     {
         $builder = $this->getManager()->createQueryBuilder();
-        $builder->select(array(
-            'detail',
-            'article',
-            'images',
-            'imageParent',
-            'imageAttribute',
-            'imageMapping',
-            'mappingRule',
-            'ruleOption',
-            'articleImages',
-            'articleImageParent'
-        ))
-            ->from('Shopware\Models\Article\Detail', 'detail')
-            ->leftJoin('detail.article', 'article')
-            ->leftJoin('detail.images', 'images')
-            ->leftJoin('images.parent', 'imageParent')
-            ->leftJoin('imageParent.attribute', 'imageAttribute')
-            ->leftJoin('images.mappings', 'imageMapping')
-            ->leftJoin('imageMapping.rules', 'mappingRule')
-            ->leftJoin('mappingRule.option', 'ruleOption')
-            ->leftJoin('article.images', 'articleImages')
-            ->leftJoin('articleImages.parent', 'articleImageParent')
-            ->where('detail.id = :detailId')
+
+        $builder->select(['images', 'imageParent', 'media'])
+            ->from(Image::class, 'images')
+            ->innerJoin('images.articleDetail', 'articleDetail')
+            ->innerJoin('images.parent', 'imageParent')
+            ->leftJoin('imageParent.media', 'media')
+            ->where('articleDetail.id = :detailId')
             ->setParameter('detailId', $detailId)
+            ->orderBy('imageParent.main', 'ASC')
+            ->addOrderBy('imageParent.position', 'ASC');
+
+        return $this->getFullResult($builder);
+    }
+
+    public function getArticleImages($articleId)
+    {
+        $builder = $this->getManager()->createQueryBuilder();
+
+        $builder->select(['images', 'media'])
+            ->from(Image::class, 'images')
+            ->leftJoin('images.children', 'children')
+            ->leftJoin('images.media', 'media')
+            ->where('images.articleId = :articleId')
+            ->andWhere('images.parentId IS NULL')
+            ->andWhere('images.articleDetailId IS NULL')
+            ->andWhere('children.id IS NULL')
+            ->setParameter('articleId', $articleId)
+            ->orderBy('images.main', 'ASC')
             ->addOrderBy('images.position', 'ASC');
 
-        return $this->getSingleResult($builder);
+        return $this->getFullResult($builder);
     }
 
     /**

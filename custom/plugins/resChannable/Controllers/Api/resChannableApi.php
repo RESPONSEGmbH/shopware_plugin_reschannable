@@ -221,13 +221,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $articleId = $detail['articleId'];
 
             # Image check here because of performance issues
-            $imageArticle = $this->channableArticleResource->getArticleImages($detail['id']);
+            $variantImages = $this->channableArticleResource->getDetailImages($detail['id']);
 
-            $images = $variantImages = $imageArticle['images'];
-
-            # If main article without variants set article images
-            if ( !$images )
-                $images = $imageArticle['article']['images'];
+            $imageArticle = $this->channableArticleResource->getArticleImages($articleId);
+            $images = array_merge($variantImages,$imageArticle);
 
             # If plugin setting "only articles with images" is set
             if ( $this->pluginConfig['apiOnlyArticlesWithImg'] && empty($images) )
@@ -271,18 +268,16 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             $item['releaseDate'] = $detail['releaseDate'];
 
-            $blIsVariant = $detail['kind'] == 1;
+            $item['is_variant'] = ($article['configuratorSetId'] > 0);
 
             # Images
             $item['images'] = $this->getArticleImagePaths($images);
 
-            if ($blIsVariant) {
+            if ($variantImages) {
                 $item['variant_images'] = $this->getArticleImagePaths($variantImages);
             } else {
                 $item['variant_images'] = array();
             }
-
-            $item['is_variant'] = $blIsVariant;
 
             # Links
             $links = $this->getArticleLinks($articleId,$article['name'],$detail['number']);
@@ -385,24 +380,34 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             # Article attributes
             if ( $detail['attribute'] ) {
-                foreach ( $this->articleAttributeConfig as $attrField => $aAttribute ) {
+
+                foreach ( $detail['attribute'] as $attrField => $sAttrValue ) {
+
+                    if ( $sAttrValue == "" || $attrField == "id" || $attrField == "articleId" || $attrField == "articleDetailId" )
+                        continue;
+
+                    if ( $attrField == "pickwarePhysicalStockForSale" ) {
+
+                        $item['pickware']['physicalStockForSale'] = $detail['attribute']['pickwarePhysicalStockForSale'];
+                        $item['pickware']['reservedStock'] = ($detail['attribute']['pickwarePhysicalStockForSale'] - $detail['inStock']);
+
+                        continue;
+                    }
+
+                    $attrKey = lcfirst(Container::camelize($attrField));
+
+                    $item['attributes'][$attrKey] = $sAttrValue;
 
                     $attrLngKey = '__attribute_'.$this->camelCaseToUnderscore($attrField);
 
                     # Set translations if available
                     if ( !empty($translationVariant[$attrLngKey]) ) {
-                        $item['attributes'][$attrField] = $translationVariant[$attrLngKey];
+                        $item['attributes'][$attrKey] = $translationVariant[$attrLngKey];
                     } elseif ( !empty($translations[$attrLngKey]) ) {
-                        $item['attributes'][$attrField] = $translations[$attrLngKey];
-                    } elseif ( !empty($detail['attribute'][$attrField]) ) {
-                        $item['attributes'][$attrField] = $detail['attribute'][$attrField];
+                        $item['attributes'][$attrKey] = $translations[$attrLngKey];
+                    } else {
+                        $item['attributes'][$attrKey] = $sAttrValue;
                     }
-                }
-
-                # Pickware stock fields
-                if ( isset($detail['attribute']['pickwarePhysicalStockForSale']) ) {
-                    $item['pickware']['physicalStockForSale'] = $detail['attribute']['pickwarePhysicalStockForSale'];
-                    $item['pickware']['reservedStock'] = ($detail['attribute']['pickwarePhysicalStockForSale'] - $detail['inStock']);
                 }
             }
 
@@ -421,6 +426,9 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             if ( $changedDate instanceof \DateTime )
                 $changed = $changedDate->format('Y-m-d H:i:s');
             $item['changed'] = $changed;
+
+            # Notification
+            $item['notification'] = $article['notification'];
 
             $result[] = $item;
         }
@@ -736,6 +744,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $propertyValues = $detail['article']['propertyValues'];
 
         $properties = array();
+
+        print_r();
 
         for ( $i = 0; $i < sizeof($propertyValues); $i++) {
 
