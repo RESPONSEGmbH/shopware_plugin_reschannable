@@ -761,7 +761,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             if ( !empty($propertyValueLng['optionValue']) )
                 $propertyValues[$i]['value'] = $propertyValueLng['optionValue'];
 
-            $properties[$optionName] = $propertyValues[$i]['value'];
+            $properties[$optionName][] = $propertyValues[$i]['value'];
 
             # Attributes
             if ( isset($propertyValues[$i]['attribute']) ) {
