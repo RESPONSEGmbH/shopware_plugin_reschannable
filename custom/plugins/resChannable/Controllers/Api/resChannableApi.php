@@ -45,7 +45,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     /**
      * @var \Shopware\Models\Shop\Shop
      */
-    protected $mainShop = null;
+    protected $fallbackShop = null;
 
     /**
      * @var int $shopId
@@ -53,9 +53,9 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     protected $shopId = null;
 
     /**
-     * @var int $mainShopId
+     * @var int $fallbackShopId
      */
-    protected $mainShopId = null;
+    protected $fallbackShopId = null;
 
     /**
      * @var string
@@ -121,12 +121,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $this->shopId = $this->shop->getId();
 
-        $this->mainShop = $this->shop->getMain();
+        $this->fallbackShop = $this->shop->getFallback();
 
-        if ( $this->mainShop )
-            $this->mainShopId = $this->mainShop->getId();
-        else
-            $this->mainShopId = $this->shopId;
+        if ( $this->fallbackShop instanceof Shopware\Models\Shop\Shop )
+            $this->fallbackShopId = $this->fallbackShop->getId();
 
         $this->admin = Shopware()->Modules()->Admin();
         $this->export = Shopware()->Modules()->Export();
@@ -155,7 +153,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         else
             $this->translationComponent = new Shopware_Components_Translation();
 
-        $this->configUnits = array_shift(array_values($this->translationComponent->read($this->shopId,'config_units')));
+        $this->configUnits = array_shift(array_values($this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'config_units')));
 
         $this->sSYSTEM = Shopware()->System();
 
@@ -231,8 +229,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                 continue;
 
             # Replace translations if exist
-            $translationVariant = $this->translationComponent->read($this->shopId,'variant',$detail['id']);
-            $translations = $this->translationComponent->read($this->shopId,'article',$articleId);
+            $translationVariant = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId,'variant', $detail['id']);
+            $translations = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId,'article', $articleId);
 
             if ( !empty($translations['name']) )
                 $article['name'] = $translations['name'];
@@ -748,7 +746,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         for ( $i = 0; $i < sizeof($propertyValues); $i++) {
 
             # Check option translation
-            $propertyOptionLng = $this->translationComponent->read($this->shopId,'propertyoption',$propertyValues[$i]['optionId']);
+            $propertyOptionLng = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'propertyoption', $propertyValues[$i]['optionId']);
 
             $optionName = $this->filterFieldNames($propertyValues[$i]['option']['name']);
 
@@ -756,7 +754,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                 $propertyValues[$i]['option']['name'] = $propertyOptionLng['optionName'];
 
             # Check value translation
-            $propertyValueLng = $this->translationComponent->read($this->shopId,'propertyvalue',$propertyValues[$i]['id']);
+            $propertyValueLng = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'propertyvalue', $propertyValues[$i]['id']);
 
             if ( !empty($propertyValueLng['optionValue']) )
                 $propertyValues[$i]['value'] = $propertyValueLng['optionValue'];
@@ -798,13 +796,13 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             for ($i = 0; $i < sizeof($detail['configuratorOptions']); $i++) {
 
-                $configuratorGroup = $this->translationComponent->read($this->shopId,'configuratorgroup',$detail['configuratorOptions'][$i]['groupId']);
+                $configuratorGroup = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'configuratorgroup', $detail['configuratorOptions'][$i]['groupId']);
 
                 if ( !empty($configuratorGroup['name']) ) {
                     $detail['configuratorOptions'][$i]['group']['name'] = $configuratorGroup['name'];
                 }
 
-                $configuratorOption = $this->translationComponent->read($this->shopId,'configuratoroption',$detail['configuratorOptions'][$i]['id']);
+                $configuratorOption = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'configuratoroption', $detail['configuratorOptions'][$i]['id']);
 
                 if ( !empty($configuratorOption['name']) )
                     $detail['configuratorOptions'][$i]['name'] = $configuratorOption['name'];
