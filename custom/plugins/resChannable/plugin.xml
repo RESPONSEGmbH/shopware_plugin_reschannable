@@ -3,12 +3,28 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="en">Channable Connector</label>
     <label lang="de">Channable Connector</label>
-    <version>1.11.0</version>
+    <version>1.11.1</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>proprietary</license>
     <link>http://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.11.1">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Verbesserung: Korrektur Freitextfelder Export mit der Shop-Einstellung "Übersetzungen übernehmen". Diese wurden nicht exportiert, wenn die Standard-Sprache keine Inhalte hatten.</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes>
+            <![CDATA[
+                <ul>
+                    <li>Improvement: Correction of free text fields export with the shop setting "Adopt translation". These were not exported if the standard language had no content.</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.11.0">
         <changes lang="de">
             <![CDATA[

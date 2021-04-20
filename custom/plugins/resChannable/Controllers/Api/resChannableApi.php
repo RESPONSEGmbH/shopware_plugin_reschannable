@@ -381,7 +381,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
                 foreach ( $detail['attribute'] as $attrField => $sAttrValue ) {
 
-                    if ( $sAttrValue == "" || $attrField == "id" || $attrField == "articleId" || $attrField == "articleDetailId" )
+                    if ( $attrField == "id" || $attrField == "articleId" || $attrField == "articleDetailId" )
                         continue;
 
                     if ( $attrField == "pickwarePhysicalStockForSale" ) {
@@ -394,18 +394,21 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
                     $attrKey = lcfirst(Container::camelize($attrField));
 
-                    $item['attributes'][$attrKey] = $sAttrValue;
-
                     $attrLngKey = '__attribute_'.$this->camelCaseToUnderscore($attrField);
 
                     # Set translations if available
                     if ( !empty($translationVariant[$attrLngKey]) ) {
-                        $item['attributes'][$attrKey] = $translationVariant[$attrLngKey];
+                        $determinedAttribute = $translationVariant[$attrLngKey];
                     } elseif ( !empty($translations[$attrLngKey]) ) {
-                        $item['attributes'][$attrKey] = $translations[$attrLngKey];
+                        $determinedAttribute = $translations[$attrLngKey];
                     } else {
-                        $item['attributes'][$attrKey] = $sAttrValue;
+                        $determinedAttribute = $sAttrValue;
                     }
+
+                    if ( !$determinedAttribute )
+                        continue;
+
+                    $item['attributes'][$attrKey] = $determinedAttribute;
                 }
             }
 
