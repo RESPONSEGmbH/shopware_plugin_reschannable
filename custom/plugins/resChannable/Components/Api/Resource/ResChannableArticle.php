@@ -2,6 +2,7 @@
 
 namespace resChannable\Components\Api\Resource;
 
+use Doctrine\ORM\Query\Expr;
 use Shopware\Components\Api\Resource\Resource;
 use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Article\Image;
@@ -176,16 +177,16 @@ class ResChannableArticle extends Resource
     public function getArticleSimilar($articleId)
     {
         $builder = $this->getManager()->createQueryBuilder();
-        $builder->select(array('article', 'PARTIAL similar.{id, name}'))
+        $builder->select(array('article', 'mainDetail', 'similarMainDetail', 'PARTIAL similar.{id, name}'))
             ->from('Shopware\Models\Article\Article', 'article')
             ->innerJoin('article.similar', 'similar')
+            ->innerJoin('article.mainDetail', 'mainDetail')
+            ->innerJoin('similar.mainDetail', 'similarMainDetail')
             ->where('article.id = :articleId')
             ->setParameter('articleId', $articleId)
             ->setMaxResults(10);
 
-        $article = $this->getSingleResult($builder);
-
-        return $article['similar'];
+        return $this->getSingleResult($builder);
     }
 
     /**
@@ -199,16 +200,16 @@ class ResChannableArticle extends Resource
     public function getArticleRelated($articleId)
     {
         $builder = $this->getManager()->createQueryBuilder();
-        $builder->select(array('article', 'PARTIAL related.{id, name}'))
+        $builder->select(array('article', 'mainDetail', 'relatedMainDetail', 'PARTIAL related.{id, name}'))
             ->from('Shopware\Models\Article\Article', 'article')
             ->innerJoin('article.related', 'related')
+            ->innerJoin('article.mainDetail', 'mainDetail')
+            ->innerJoin('related.mainDetail', 'relatedMainDetail')
             ->where('article.id = :articleId')
             ->setParameter('articleId', $articleId)
             ->setMaxResults(10);
 
-        $article = $this->getSingleResult($builder);
-
-        return $article['related'];
+        return $this->getSingleResult($builder);
     }
 
     /**

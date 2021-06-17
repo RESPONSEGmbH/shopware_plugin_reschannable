@@ -368,10 +368,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['options'] = $this->getDetailConfiguratorOptions($detail['id']);
 
             # Similar
-            $item['similar'] = $this->channableArticleResource->getArticleSimilar($articleId);
+            $item['similar'] = $this->getArticleSimilar($articleId);
 
             # Related
-            $item['related'] = $this->channableArticleResource->getArticleRelated($articleId);
+            $item['related'] = $this->getArticleRelated($articleId);
 
             # Excluded customer groups
             $item['excludedCustomerGroups'] = $this->getExcludedCustomerGroups($detail['id']);
@@ -857,7 +857,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     /**
      * Save webhook url in order to activate or deactivate the webhooks
      *
-     * @param $url
+     * @param string $url
      * @throws ParameterMissingException
      */
     private function _saveWebHookUrl($url)
@@ -884,8 +884,10 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     /**
      * @param int $detailID
      * @param int $tax
-     *
-     * @return string
+     * @return array|\Doctrine\ORM\QueryBuilder
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
      */
     private function getAdditionalPrices($detailID, $tax)
     {
@@ -904,6 +906,56 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         }
 
         return $prices;
+    }
+
+    /**
+     * @param int $articleId
+     * @return array
+     */
+    private function getArticleSimilar($articleId)
+    {
+        $article = $this->channableArticleResource->getArticleSimilar($articleId);
+
+        $articles = array();
+
+        if ( !empty($article) && !empty($article['similar']) ) {
+
+            foreach ($article['similar'] as $index => $similar ) {
+
+                $articles['article'.($index+1)] = array(
+                    'articleNumber' => $similar['mainDetail']['number'],
+                    'name' => $similar['name'],
+                    'id' => $similar['id']
+                );
+            }
+        }
+
+        return $articles;
+    }
+
+    /**
+     * @param int $articleId
+     * @return array
+     */
+    private function getArticleRelated($articleId)
+    {
+        $article = $this->channableArticleResource->getArticleRelated($articleId);
+
+        $articles = array();
+
+        if ( !empty($article) && !empty($article['related']) ) {
+
+            foreach ($article['related'] as $index => $similar ) {
+
+                $articles['article'.($index+1)] = array(
+                    'articleNumber' => $similar['mainDetail']['number'],
+                    'name' => $similar['name'],
+                    'id' => $similar['id']
+                );
+            }
+        }
+
+        return $articles;
     }
 
 }
