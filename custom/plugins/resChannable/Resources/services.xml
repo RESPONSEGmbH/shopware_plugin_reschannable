@@ -13,11 +13,11 @@
             <tag name="shopware.event_subscriber" />
         </service>
 
-        <service id="shopware.api.reschannablearticle" class="resChannable\Components\Api\Resource\ResChannableArticle">
+        <service id="shopware.api.reschannablearticle" class="resChannable\Components\Api\Resource\ResChannableArticle" public="true">
             <tag name="shopware.api_resource"/>
         </service>
 
-        <service id="reschannable_service_plugin.webhook" class="resChannable\Components\Webhook\ResChannableWebhook">
+        <service id="reschannable_service_plugin.webhook" class="resChannable\Components\Webhook\ResChannableWebhook" public="true">
             <argument type="service" id="dbal_connection" />
             <argument type="service" id="models" />
             <argument type="service" id="shopware.plugin.cached_config_reader" />
