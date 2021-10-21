@@ -267,6 +267,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['releaseDate'] = $detail['releaseDate'];
 
             $item['is_variant'] = ($article['configuratorSetId'] > 0);
+            $item['mainVariant'] = ($item['is_variant'] && $detail['id'] == $article['mainDetailId']);
 
             # Images
             $item['images'] = $this->getArticleImagePaths($images);
@@ -517,10 +518,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
                     $images[] = $image['path'];
 
                 }
-
-            } catch ( \Exception $Exception ) {
-
-            }
+            } catch ( \Exception $Exception ) {}
         }
 
         return $images;
@@ -536,7 +534,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
      *
      * @return array
      */
-    protected function getArticleLinks($articleId,$name,$number)
+    protected function getArticleLinks($articleId, $name, $number)
     {
         $baseFile = $this->getBasePath();
         $detail = $baseFile . '?sViewport=detail&sArticle=' . $articleId . '&number='.$number;
@@ -545,11 +543,11 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $seoUrl = $baseFile . $this->channableArticleResource->getArticleSeoUrl($articleId,$this->shopId) . '?number='.$number;
 
-        $links = array('rewrite' => $rewrite,
-                       'url'  => $detail,
-                       'seoUrl' => $seoUrl);
-
-        return $links;
+        return array(
+            'rewrite' => $rewrite,
+            'url'  => $detail,
+            'seoUrl' => $seoUrl
+        );
     }
 
     /**
@@ -561,9 +559,8 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     {
         $url = $this->Request()->getBaseUrl() . '/';
         $uri = $this->Request()->getScheme() . '://' . $this->Request()->getHttpHost();
-        $url = $uri . $url;
 
-        return $url;
+        return $uri.$url;
     }
 
     /**
@@ -669,9 +666,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $em = $this->getModelManager();
         $categoryRepo = $em->getRepository('Shopware\Models\Category\Category');
 
-        $path = array_values($categoryRepo->getPathById($category['categoryId']));
-
-        return $path;
+        return array_values($categoryRepo->getPathById($category['categoryId']));
     }
 
     /**
@@ -698,9 +693,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $country = 2;
 
-        $shippingCosts = $this->export->sGetArticleShippingcost($article, $payment, $country);
-
-        return $shippingCosts;
+        return $this->export->sGetArticleShippingcost($article, $payment, $country);
     }
 
     /**

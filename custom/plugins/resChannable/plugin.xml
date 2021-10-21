@@ -3,12 +3,28 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="en">Channable Connector</label>
     <label lang="de">Channable Connector</label>
-    <version>1.11.4</version>
+    <version>1.12.0</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>proprietary</license>
-    <link>http://www.response-gmbh.de/</link>
+    <link>https://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.12.0">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Feature: Es wird jetzt das Feld "Vorauswahl" von den Varianten exportiert (mainVariant)</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes>
+            <![CDATA[
+                <ul>
+                    <li>Feature: The "Preselection" field is now exported from the variants (mainVariant)</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.11.4">
         <changes lang="de">
             <![CDATA[
