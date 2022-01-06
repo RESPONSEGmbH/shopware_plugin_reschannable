@@ -2,7 +2,6 @@
 
 namespace resChannable\Components\Api\Resource;
 
-use Doctrine\ORM\Query\Expr;
 use Shopware\Components\Api\Resource\Resource;
 use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Article\Image;
@@ -176,17 +175,20 @@ class ResChannableArticle extends Resource
      */
     public function getArticleSimilar($articleId)
     {
-        $builder = $this->getManager()->createQueryBuilder();
-        $builder->select(array('article', 'mainDetail', 'similarMainDetail', 'PARTIAL similar.{id, name}'))
-            ->from('Shopware\Models\Article\Article', 'article')
-            ->innerJoin('article.similar', 'similar')
-            ->innerJoin('article.mainDetail', 'mainDetail')
-            ->innerJoin('similar.mainDetail', 'similarMainDetail')
-            ->where('article.id = :articleId')
-            ->setParameter('articleId', $articleId)
+        $builder = $this->getManager()->getConnection()->createQueryBuilder();
+
+        $builder->select(['similarArticles.id', 'similarArticles.name','similarVariant.ordernumber as number'])
+            ->from('s_articles_similar', 'similar')
+            ->innerJoin('similar', 's_articles', 'product', 'product.id = similar.articleID')
+            ->innerJoin('similar', 's_articles', 'similarArticles', 'similarArticles.id = similar.relatedArticle')
+            ->innerJoin('similarArticles', 's_articles_details', 'similarVariant', 'similarVariant.id = similarArticles.main_detail_id')
+            ->where('product.id = :id')
+            ->setParameter(':id', $articleId)
             ->setMaxResults(10);
 
-        return $this->getSingleResult($builder);
+        $statement = $builder->execute();
+
+        return $statement->fetchAll();
     }
 
     /**
@@ -199,17 +201,21 @@ class ResChannableArticle extends Resource
      */
     public function getArticleRelated($articleId)
     {
-        $builder = $this->getManager()->createQueryBuilder();
-        $builder->select(array('article', 'mainDetail', 'relatedMainDetail', 'PARTIAL related.{id, name}'))
-            ->from('Shopware\Models\Article\Article', 'article')
-            ->innerJoin('article.related', 'related')
-            ->innerJoin('article.mainDetail', 'mainDetail')
-            ->innerJoin('related.mainDetail', 'relatedMainDetail')
-            ->where('article.id = :articleId')
-            ->setParameter('articleId', $articleId)
-            ->setMaxResults(10);
+        $builder = $this->getManager()->getConnection()->createQueryBuilder();
 
-        return $this->getSingleResult($builder);
+        $builder->select(['relatedArticles.id', 'relatedArticles.name', 'relatedVariant.ordernumber as number']);
+
+        $builder->from('s_articles_relationships', 'relation')
+            ->innerJoin('relation', 's_articles', 'product', 'product.id = relation.articleID')
+            ->innerJoin('relation', 's_articles', 'relatedArticles', 'relatedArticles.id = relation.relatedArticle')
+            ->innerJoin('relatedArticles', 's_articles_details', 'relatedVariant', 'relatedVariant.id = relatedArticles.main_detail_id')
+            ->where('product.id = :id')
+            ->setParameter(':id', $articleId)
+            ->setMaxResults(10);;
+
+        $statement = $builder->execute();
+
+        return $statement->fetchAll();
     }
 
     /**

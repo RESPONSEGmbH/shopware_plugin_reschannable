@@ -20,6 +20,12 @@
             <label lang="en">Only transfer items with EAN</label>
             <value>false</value>
         </element>
+        <element type="boolean" scope="shop">
+            <name>apiOnlyArticlesWithStock</name>
+            <label lang="de"><![CDATA[Nur Artikel mit Bestand übertragen]]></label>
+            <label lang="en">Only transfer items with stock</label>
+            <value>false</value>
+        </element>
         <element type="number" scope="shop">
             <name>apiPollLimit</name>
             <label lang="de">Performance: API Datensatz Limit je Abruf</label>

@@ -16,11 +16,8 @@ class Shopware_Controllers_Backend_ReschannableAutoConnect extends Enlight_Contr
         $user = Shopware()->Models()->getRepository('Shopware\Models\User\User');
         $user = $user->findOneBy(array('username' => 'ChannableApiUser'));
 
-        if ( !$user ) {
-
+        if ( !$user )
             throw new Shopware\Components\Api\Exception\NotFoundException('Channable API user not found.');
-
-        }
 
         $sApiKey = $user->getApiKey();
 
@@ -28,11 +25,8 @@ class Shopware_Controllers_Backend_ReschannableAutoConnect extends Enlight_Contr
 
         preg_match_all('/[0-9]+/',$shopValue,$shops);
 
-        if ( !$shops ) {
-
+        if ( !$shops )
             throw new Shopware\Components\Api\Exception\NotFoundException('Shop not found.');
-
-        }
 
         $shopValue = $shops[0];
         $shopId = $shopValue[0];
@@ -45,12 +39,10 @@ class Shopware_Controllers_Backend_ReschannableAutoConnect extends Enlight_Contr
         $scheme = 'http';
         $secure = $shop->getSecure();
 
-        if ($secure) {
+        if ($secure)
             $scheme = 'https';
-        }
 
         $mainShop = $shop->getMain();
-        $mainId = null;
         if ($mainShop) {
             $scheme = 'http';
 
@@ -59,9 +51,8 @@ class Shopware_Controllers_Backend_ReschannableAutoConnect extends Enlight_Contr
             $basePath = $mainShop->getBasePath();
             $host = $mainShop->getHost();
 
-            if ($secure) {
+            if ($secure)
                 $scheme = 'https';
-            }
         }
 
         $path = $scheme . '://' . $host . $basePath;

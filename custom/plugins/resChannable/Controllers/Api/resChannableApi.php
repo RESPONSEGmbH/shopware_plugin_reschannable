@@ -454,7 +454,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $filter = array();
 
-        # filter category id
+        # Filter category id
         $categoriesId = $this->shop->getCategory()->getId();
 
         $filter[] = array(
@@ -463,7 +463,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             'value'      => $categoriesId
         );
 
-        # only active articles
+        # Only active articles
         if ( $this->pluginConfig['apiOnlyActiveArticles'] ) {
             $filter[] = array(
                 'property'   => 'article.active',
@@ -477,7 +477,16 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             );
         }
 
-        # only articles with an ean
+        # Only articles with stock
+        if ( $this->pluginConfig['apiOnlyArticlesWithStock'] ) {
+            $filter[] = array(
+                'property'   => 'detail.instock',
+                'expression' => '>',
+                'value'      => '0'
+            );
+        }
+
+        # Only articles with an ean
         if ( $this->pluginConfig['apiOnlyArticlesWithEan'] ) {
             $filter[] = array(
                 'property'   => 'detail.ean',
@@ -907,18 +916,18 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
      */
     private function getArticleSimilar($articleId)
     {
-        $article = $this->channableArticleResource->getArticleSimilar($articleId);
+        $similars = $this->channableArticleResource->getArticleSimilar($articleId);
 
         $articles = array();
 
-        if ( !empty($article) && !empty($article['similar']) ) {
+        if ( !empty($similars) ) {
 
-            foreach ($article['similar'] as $index => $similar ) {
+            foreach ($similars as $index => $similar ) {
 
                 $articles['article'.($index+1)] = array(
-                    'articleNumber' => $similar['mainDetail']['number'],
+                    'articleNumber' => $similar['number'],
                     'name' => $similar['name'],
-                    'id' => $similar['id']
+                    'id' => (int)$similar['id']
                 );
             }
         }
@@ -932,18 +941,18 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
      */
     private function getArticleRelated($articleId)
     {
-        $article = $this->channableArticleResource->getArticleRelated($articleId);
+        $relateds = $this->channableArticleResource->getArticleRelated($articleId);
 
         $articles = array();
 
-        if ( !empty($article) && !empty($article['related']) ) {
+        if ( !empty($relateds) ) {
 
-            foreach ($article['related'] as $index => $similar ) {
+            foreach ($relateds as $index => $related ) {
 
                 $articles['article'.($index+1)] = array(
-                    'articleNumber' => $similar['mainDetail']['number'],
-                    'name' => $similar['name'],
-                    'id' => $similar['id']
+                    'articleNumber' => $related['number'],
+                    'name' => $related['name'],
+                    'id' => (int)$related['id']
                 );
             }
         }

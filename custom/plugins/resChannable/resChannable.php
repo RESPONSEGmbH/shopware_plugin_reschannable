@@ -60,7 +60,7 @@ class resChannable extends Plugin
      */
     public function onPostDispatchSecureBackendIndex(\Enlight_Event_EventArgs $args)
     {
-        $this->container->get('Template')->addTemplateDir(
+        $this->container->get('template')->addTemplateDir(
             $this->getPath() . '/Resources/views/'
         );
     }
