@@ -3,12 +3,30 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="en">Channable Connector</label>
     <label lang="de">Channable Connector</label>
-    <version>1.13.0</version>
+    <version>1.13.1</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>proprietary</license>
     <link>https://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.13.1">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Verbesserung: PHP 8 Kompatibilität</li>
+                    <li>Bugfix: Korrektur der Plugin-Einstellung "Nur Artikel mit Bestand übertragen"</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes>
+            <![CDATA[
+                <ul>
+                    <li>Improvement: PHP 8 compatibility</li>
+                    <li>Bugfix: Plugin setting "Only transfer items with stock" fixed</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.13.0">
         <changes lang="de">
             <![CDATA[

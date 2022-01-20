@@ -357,12 +357,11 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['shippingCosts'] = 0;
 
             # Properties
+            $item['properties'] = array();
             if (!empty($this->pluginConfig['properties'])) {
                 foreach ($this->getArticleProperties($detail['id']) as $sKey => $sValue) {
                     $item['properties'][$sKey] = $sValue;
                 }
-            } else {
-                $item['properties'] = array();
             }
 
             # Configuration
@@ -480,7 +479,7 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         # Only articles with stock
         if ( $this->pluginConfig['apiOnlyArticlesWithStock'] ) {
             $filter[] = array(
-                'property'   => 'detail.instock',
+                'property'   => 'detail.inStock',
                 'expression' => '>',
                 'value'      => '0'
             );
@@ -511,23 +510,26 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
     {
         $images = array();
 
-        $imageCnt = count($articleImages);
-        for ( $i = 0; $i < $imageCnt; $i++ ) {
+        if ( !empty($articleImages) ) {
+            $imageCnt = count($articleImages);
+            for ($i = 0; $i < $imageCnt; $i++) {
 
-            try {
+                try {
 
-                if ($articleImages[$i]['mediaId']) {
+                    if ($articleImages[$i]['mediaId']) {
 
-                    $image = $this->mediaResource->getOne($articleImages[$i]['mediaId']);
-                    $images[] = $image['path'];
+                        $image = $this->mediaResource->getOne($articleImages[$i]['mediaId']);
+                        $images[] = $image['path'];
 
-                } elseif ( !empty($articleImages[$i]['parent']) && $articleImages[$i]['parent']['mediaId'] ) {
+                    } elseif (!empty($articleImages[$i]['parent']) && $articleImages[$i]['parent']['mediaId']) {
 
-                    $image = $this->mediaResource->getOne($articleImages[$i]['parent']['mediaId']);
-                    $images[] = $image['path'];
+                        $image = $this->mediaResource->getOne($articleImages[$i]['parent']['mediaId']);
+                        $images[] = $image['path'];
 
+                    }
+                } catch (\Exception $Exception) {
                 }
-            } catch ( \Exception $Exception ) {}
+            }
         }
 
         return $images;
@@ -675,7 +677,15 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
         $em = $this->getModelManager();
         $categoryRepo = $em->getRepository('Shopware\Models\Category\Category');
 
-        return array_values($categoryRepo->getPathById($category['categoryId']));
+        $categoryPath = $categoryRepo->getPathById($category['categoryId']);
+
+        $seoCategory = array();
+
+        # Important for php 8. $categoryPath can return an empty string, array_values wants an array
+        if ( is_array($categoryPath) )
+            $seoCategory = array_values($categoryPath);
+
+        return $seoCategory;
     }
 
     /**
@@ -748,36 +758,38 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
         $properties = array();
 
-        for ( $i = 0; $i < sizeof($propertyValues); $i++) {
+        if ( !empty($propertyValues) ) {
+            for ($i = 0; $i < sizeof($propertyValues); $i++) {
 
-            # Check option translation
-            $propertyOptionLng = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'propertyoption', $propertyValues[$i]['optionId']);
+                # Check option translation
+                $propertyOptionLng = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'propertyoption', $propertyValues[$i]['optionId']);
 
-            $optionName = $this->filterFieldNames($propertyValues[$i]['option']['name']);
+                $optionName = $this->filterFieldNames($propertyValues[$i]['option']['name']);
 
-            if ( !empty($propertyOptionLng['optionName']) )
-                $propertyValues[$i]['option']['name'] = $propertyOptionLng['optionName'];
+                if (!empty($propertyOptionLng['optionName']))
+                    $propertyValues[$i]['option']['name'] = $propertyOptionLng['optionName'];
 
-            # Check value translation
-            $propertyValueLng = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'propertyvalue', $propertyValues[$i]['id']);
+                # Check value translation
+                $propertyValueLng = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'propertyvalue', $propertyValues[$i]['id']);
 
-            if ( !empty($propertyValueLng['optionValue']) )
-                $propertyValues[$i]['value'] = $propertyValueLng['optionValue'];
+                if (!empty($propertyValueLng['optionValue']))
+                    $propertyValues[$i]['value'] = $propertyValueLng['optionValue'];
 
-            $properties[$optionName][] = $propertyValues[$i]['value'];
+                $properties[$optionName][] = $propertyValues[$i]['value'];
 
-            # Attributes
-            if ( isset($propertyValues[$i]['attribute']) ) {
-                foreach ( $propertyValues[$i]['attribute'] as $valAttr => $valAttrVal ) {
+                # Attributes
+                if (isset($propertyValues[$i]['attribute'])) {
+                    foreach ($propertyValues[$i]['attribute'] as $valAttr => $valAttrVal) {
 
-                    if ( $valAttr != 'id' && $valAttr != 'propertyValueId' ) {
+                        if ($valAttr != 'id' && $valAttr != 'propertyValueId') {
 
-                        $lngKey = '__attribute_'.$this->camelCaseToUnderscore($valAttr);
+                            $lngKey = '__attribute_' . $this->camelCaseToUnderscore($valAttr);
 
-                        if ( isset($propertyValueLng[$lngKey]) )
-                            $valAttrVal = $propertyValueLng[$lngKey];
+                            if (isset($propertyValueLng[$lngKey]))
+                                $valAttrVal = $propertyValueLng[$lngKey];
 
-                        $properties[$optionName . "_" . $this->filterFieldNames($valAttr)] = $valAttrVal;
+                            $properties[$optionName . "_" . $this->filterFieldNames($valAttr)] = $valAttrVal;
+                        }
                     }
                 }
             }
