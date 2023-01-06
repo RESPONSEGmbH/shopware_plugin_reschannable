@@ -228,26 +228,30 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             if ( $this->pluginConfig['apiOnlyArticlesWithImg'] && empty($images) )
                 continue;
 
-            # Replace translations if exist
-            $translationVariant = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId,'variant', $detail['id']);
-            $translations = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId,'article', $articleId);
+            # Replace translations if not default shop
+            if ( !$this->shop->getDefault() ) {
+                $translationVariant = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'variant', $detail['id']);
+                $translations = $this->translationComponent->readWithFallback($this->shopId, $this->fallbackShopId, 'article', $articleId);
 
-            if ( !empty($translations['name']) )
-                $article['name'] = $translations['name'];
-            if ( !empty($translations['description']) )
-                $article['description'] = $translations['description'];
-            if ( !empty($translations['descriptionLong']) )
-                $article['descriptionLong'] = $translations['descriptionLong'];
-            if ( !empty($translations['keywords']) )
-                $article['keywords'] = $translations['keywords'];
-            if ( !empty($translationVariant['additionalText']) )
-                $detail['additionalText'] = $translationVariant['additionalText'];
-            if ( !empty($translationVariant['packUnit']) )
-                $detail['packUnit'] = $translationVariant['packUnit'];
-            if ( !empty($this->configUnits['unit']) && !empty($detail['unit']['unit']) )
-                $detail['unit']['unit'] = $this->configUnits['unit'];
-            if ( !empty($this->configUnits['description']) && !empty($detail['unit']['name']) )
-                $detail['unit']['name'] = $this->configUnits['description'];
+                if (!empty($translations['name']))
+                    $article['name'] = $translations['name'];
+                if (!empty($translations['description']))
+                    $article['description'] = $translations['description'];
+                if (!empty($translations['descriptionLong']))
+                    $article['descriptionLong'] = $translations['descriptionLong'];
+                if (!empty($translations['keywords']))
+                    $article['keywords'] = $translations['keywords'];
+                if (!empty($translations['metaTitle']))
+                    $article['metaTitle'] = $translations['metaTitle'];
+                if (!empty($translationVariant['additionalText']))
+                    $detail['additionalText'] = $translationVariant['additionalText'];
+                if (!empty($translationVariant['packUnit']))
+                    $detail['packUnit'] = $translationVariant['packUnit'];
+                if (!empty($this->configUnits['unit']) && !empty($detail['unit']['unit']))
+                    $detail['unit']['unit'] = $this->configUnits['unit'];
+                if (!empty($this->configUnits['description']) && !empty($detail['unit']['name']))
+                    $detail['unit']['name'] = $this->configUnits['description'];
+            }
 
             $item = array();
 
@@ -260,8 +264,6 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
             $item['supplier'] = $article['supplier']['name'];
             $item['supplierNumber'] = $detail['supplierNumber'];
             $item['ean'] = $detail['ean'];
-            $item['description'] = $article['description'];
-            $item['keywords'] = $article['keywords'];
             $item['descriptionLong'] = $article['descriptionLong'];
 
             $item['releaseDate'] = $detail['releaseDate'];
@@ -430,6 +432,11 @@ class Shopware_Controllers_Api_resChannableApi extends Shopware_Controllers_Api_
 
             # Notification
             $item['notification'] = $article['notification'];
+
+            # Metas
+            $item['metaTitle'] = $article['metaTitle'];
+            $item['description'] = $article['description'];
+            $item['keywords'] = $article['keywords'];
 
             $result[] = $item;
         }

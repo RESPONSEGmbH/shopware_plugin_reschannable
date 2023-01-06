@@ -3,12 +3,28 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="en">Channable Connector</label>
     <label lang="de">Channable Connector</label>
-    <version>1.13.1</version>
+    <version>1.14.0</version>
     <copyright>(c) by RESPONSE GmbH</copyright>
     <license>proprietary</license>
     <link>https://www.response-gmbh.de/</link>
     <author>RESPONSE GmbH</author>
     <compatibility minVersion="5.2.27"/>
+    <changelog version="1.14.0">
+        <changes lang="de">
+            <![CDATA[
+                <ul>
+                    <li>Feature: Export des Meta Titels</li>
+                </ul>
+            ]]>
+        </changes>
+        <changes>
+            <![CDATA[
+                <ul>
+                    <li>Feature: Export of the meta title</li>
+                </ul>
+            ]]>
+        </changes>
+    </changelog>
     <changelog version="1.13.1">
         <changes lang="de">
             <![CDATA[
